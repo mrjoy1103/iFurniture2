@@ -13,6 +13,7 @@ class _BluetoothScannerPageState extends State<BluetoothScannerPage> {
   bool isConnected = false;
   String? data;
   bool isData = false;
+  List<String> deviceList = [];
 
   static const String SCANNING_FINISHED_WITH_NO_DEVICE = 'SCANNING_FINISHED_WITH_NO_DEVICE';
   static const String DEVICE_GATT_AVAILABLE = 'DEVICE_GATT_AVAILABLE';
@@ -96,7 +97,10 @@ class _BluetoothScannerPageState extends State<BluetoothScannerPage> {
                     return deviceNotFound();
                   } else {
                     List<String> device = snapshot.data.toString().split(",");
-                    return deviceFound(device[0], device[1]);
+                    if (!deviceList.contains(device[0])) {
+                      deviceList.add(device[0]);
+                    }
+                    return deviceListFound();
                   }
                 } else {
                   return deviceScanning();
@@ -151,6 +155,7 @@ class _BluetoothScannerPageState extends State<BluetoothScannerPage> {
       ),
     );
   }
+
   Widget deviceNotFound() {
     return Card(
       child: Padding(
@@ -170,91 +175,37 @@ class _BluetoothScannerPageState extends State<BluetoothScannerPage> {
     );
   }
 
-  Widget deviceFound(String address, String name) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        child: Row(
-          children: [
-            isConnected
-                ? const Icon(Icons.bluetooth_connected_rounded, color: Colors.green)
-                : const Icon(Icons.bluetooth_rounded, color: Colors.grey),
-            const SizedBox(width: 10),
-            Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 6),
-                  Text(address, style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
-                ]),
-            const Spacer(),
-            ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                      isConnected ? Colors.green : Colors.lightBlue),
-                ),
-                onPressed: () {
-                  _bluetoothAdvanced.connectDevice().listen((event) {
-                    switch (event.toString()) {
-                      case STATE_RECOGNIZING:
-                        break;
-                      case STATE_CONNECTING:
-                        break;
-                      case STATE_CONNECTED:
-                        setState(() {
-                          isConnected = true;
-                        });
-                        break;
-                      case STATE_DISCONNECTED:
-                        setState(() {
-                          isConnected = false;
-                        });
-                        break;
-                      case STATE_CONNECTING_FAILED:
-                        break;
-                      default:
-                    }
+  Widget deviceListFound() {
+    return ListView.builder(
+      itemCount: deviceList.length,
+      itemBuilder: (context, index) {
+        String device = deviceList[index];
+        return ListTile(
+          title: Text(device),
+          onTap: () {
+            _bluetoothAdvanced.connectDevice().listen((event) {
+              switch (event.toString()) {
+                case STATE_CONNECTING:
+                  print('Connecting to $device');
+                  break;
+                case STATE_CONNECTED:
+                  setState(() {
+                    isConnected = true;
                   });
-                },
-                child: Text(
-                  isConnected ? 'Connected' : 'Connect',
-                  style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
-                )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget bottomBar() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Icon(Icons.info_outline_rounded, color: Colors.grey),
-            SizedBox(width: 10),
-            Text(
-              'Remember to turn on Bluetooth\nand GPS first',
-              style: TextStyle(fontStyle: FontStyle.italic, color: Colors.blueGrey),
-            ),
-          ],
-        ),
-        const Spacer(),
-        ElevatedButton(
-            style: ButtonStyle(
-              padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                  const EdgeInsets.symmetric(vertical: 20)),
-              backgroundColor: MaterialStateProperty.all<Color>(
-                  isConnected && isData ? Colors.cyan.shade900 : Colors.grey),
-            ),
-            onPressed: () async {
-              await _bluetoothAdvanced.dispose();
-            },
-            child: const Icon(Icons.stop_circle)),
-      ],
+                  print('Connected to $device');
+                  break;
+                case STATE_DISCONNECTED:
+                  setState(() {
+                    isConnected = false;
+                  });
+                  print('Disconnected from $device');
+                  break;
+                default:
+              }
+            });
+          },
+        );
+      },
     );
   }
 }
