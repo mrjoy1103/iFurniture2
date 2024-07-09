@@ -34,7 +34,10 @@ class _BluetoothScannerPageState extends State<BluetoothScannerPage> {
   }
 
   Future<void> _checkPermissions() async {
-    if (await Permission.location.request().isGranted) {
+    if (await Permission.location.request().isGranted &&
+        await Permission.bluetooth.request().isGranted &&
+    await Permission.bluetoothConnect.request().isGranted
+    ) {
       initBluetoothConfig();
       listentoDeviceData();
     } else {
