@@ -14,6 +14,8 @@ class _BluetoothScannerPageState extends State<BluetoothScannerPage> {
   String? data;
   bool isData = false;
   List<String> deviceList = [];
+  String? serviceUUID;
+  String? dataUUID;
 
   static const String SCANNING_FINISHED_WITH_NO_DEVICE = 'SCANNING_FINISHED_WITH_NO_DEVICE';
   static const String DEVICE_GATT_AVAILABLE = 'DEVICE_GATT_AVAILABLE';
@@ -36,25 +38,26 @@ class _BluetoothScannerPageState extends State<BluetoothScannerPage> {
   Future<void> _checkPermissions() async {
     if (await Permission.location.request().isGranted &&
         await Permission.bluetooth.request().isGranted &&
-    await Permission.bluetoothConnect.request().isGranted
-    ) {
+        await Permission.bluetoothConnect.request().isGranted) {
       initBluetoothConfig();
       listentoDeviceData();
     } else {
       // Handle permission denial
-      print("Location permission is required for Bluetooth scanning");
+      _showMessage("Location and Bluetooth permissions are required for Bluetooth scanning");
     }
   }
 
   Future<void> initBluetoothConfig() async {
     try {
-      await _bluetoothAdvanced.setServiceCharactersticUUID("46409BE5-6967-4557-8E70-784E1E55263B");
-      await _bluetoothAdvanced.setDataCharactersticUUID("720330F4-1DB7-4FD7-AE5A-87E5BD942880");
+      serviceUUID = "46409BE5-6967-4557-8E70-784E1E55263B";
+      dataUUID = "720330F4-1DB7-4FD7-AE5A-87E5BD942880";
+      await _bluetoothAdvanced.setServiceCharactersticUUID(serviceUUID!);
+      await _bluetoothAdvanced.setDataCharactersticUUID(dataUUID!);
       await _bluetoothAdvanced.setScanPeriod(10000);
-      await _bluetoothAdvanced.setNotificationText("new text");
-      await _bluetoothAdvanced.setNotificationTitle("new title");
+      await _bluetoothAdvanced.setNotificationText("New text");
+      await _bluetoothAdvanced.setNotificationTitle("New title");
     } catch (e) {
-      print(e.toString());
+      _showMessage(e.toString());
     }
   }
 
@@ -81,11 +84,23 @@ class _BluetoothScannerPageState extends State<BluetoothScannerPage> {
     });
   }
 
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Bluetooth Scanner'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.info),
+            onPressed: () {
+              _showMessage("Service UUID: $serviceUUID\nData UUID: $dataUUID");
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -114,6 +129,11 @@ class _BluetoothScannerPageState extends State<BluetoothScannerPage> {
           ElevatedButton(
             onPressed: () {
               _bluetoothAdvanced.dispose();
+              setState(() {
+                isConnected = false;
+                deviceList.clear();
+              });
+              _showMessage("Disconnected");
             },
             child: Text('Disconnect'),
           ),
@@ -150,7 +170,7 @@ class _BluetoothScannerPageState extends State<BluetoothScannerPage> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 20),
         child: Row(
           children: const [
-            Text("scanning devices", style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
+            Text("Scanning devices", style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
             SizedBox(width: 12),
             SizedBox(height: 22, width: 22, child: CircularProgressIndicator())
           ],
@@ -170,7 +190,7 @@ class _BluetoothScannerPageState extends State<BluetoothScannerPage> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             const Text(
-                "Troubleshoot: \n ► Try increasing the scan period.\n ► Check if the device is paired in bluetooth settings.\n ► Check if paired device has correct configurations like UUIDs",
+                "Troubleshoot: \n ► Try increasing the scan period.\n ► Check if the device is paired in Bluetooth settings.\n ► Check if the paired device has correct configurations like UUIDs",
                 style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
           ],
         ),
@@ -189,19 +209,22 @@ class _BluetoothScannerPageState extends State<BluetoothScannerPage> {
             _bluetoothAdvanced.connectDevice().listen((event) {
               switch (event.toString()) {
                 case STATE_CONNECTING:
-                  print('Connecting to $device');
+                  _showMessage('Connecting to $device');
                   break;
                 case STATE_CONNECTED:
                   setState(() {
                     isConnected = true;
                   });
-                  print('Connected to $device');
+                  _showMessage('Connected to $device');
                   break;
                 case STATE_DISCONNECTED:
                   setState(() {
                     isConnected = false;
                   });
-                  print('Disconnected from $device');
+                  _showMessage('Disconnected from $device');
+                  break;
+                case STATE_CONNECTING_FAILED:
+                  _showMessage('Failed to connect to $device');
                   break;
                 default:
               }

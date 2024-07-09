@@ -30,7 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.13.3
+  http: ^1.2.1
   cupertino_icons: ^1.0.6
   shared_preferences: ^2.0.13
   device_info_plus: ^10.0.0
@@ -38,7 +38,7 @@ dependencies:
   smooth_page_indicator: ^1.0.0+2
   dropdown_search: ^5.0.2
   bluetooth_advanced: ^0.0.83
-  permission_handler: ^10.0.0
+  permission_handler: ^11.3.1
 
 
 
@@ -51,7 +51,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
