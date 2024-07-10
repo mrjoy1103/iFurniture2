@@ -208,6 +208,9 @@ class InventoryProvider with ChangeNotifier {
     _safeNotifyListeners();
   }
 
+  bool containsItemNumber(int itemNumber) {
+    return _inventory.any((item) => item.itemNumber == itemNumber);
+  }
 
   void _safeNotifyListeners() {
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {

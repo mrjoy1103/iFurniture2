@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:fw_demo/pages/lists_page.dart';
-import 'package:fw_demo/pages/login.dart';
-import 'package:fw_demo/pages/product_inventory.dart';
-
+import 'package:provider/provider.dart';
+import 'package:fw_demo/pages/barcodecamerascan.dart'; // Import the new BarcodeScannerCameraPage
+import 'lists_page.dart';
+import 'login.dart';
+import 'product_inventory.dart';
 import '../utils/sharedprefutils.dart';
-import 'barcodeScanner.dart';
-import 'bluetoothScanner.dart'; // Import the new lists page
+import 'package:fw_demo/utils/bluetooth_manager.dart';
+import 'package:fw_demo/pages/barcodeScanner.dart';
 
 class MenuPage extends StatefulWidget {
   @override
@@ -42,7 +43,7 @@ class _MenuPageState extends State<MenuPage> {
           TextButton(
             onPressed: () => Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => LoginPage()), // Update with the correct path
+              MaterialPageRoute(builder: (context) => LoginPage()),
             ),
             child: Text('Yes'),
           ),
@@ -53,11 +54,20 @@ class _MenuPageState extends State<MenuPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bluetoothManager = Provider.of<BluetoothManager>(context);
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
           title: Text('Menu'),
+          actions: [
+            if (bluetoothManager.isConnected)
+              IconButton(
+                icon: Icon(Icons.bluetooth_disabled),
+                onPressed: () => bluetoothManager.disconnect(),
+              ),
+          ],
         ),
         body: Center(
           child: _serverAddress == null
@@ -67,7 +77,6 @@ class _MenuPageState extends State<MenuPage> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  // Navigate to Product Inventory Page
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -79,7 +88,6 @@ class _MenuPageState extends State<MenuPage> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  // Navigate to Lists Page
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -91,20 +99,16 @@ class _MenuPageState extends State<MenuPage> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  // Log out and navigate to Login Page
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => LoginPage()), // Update with the correct path
+                    MaterialPageRoute(builder: (context) => LoginPage()),
                   );
                 },
                 child: Text('Log Out'),
               ),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => BluetoothScannerPage()),
-                  );
+
                 },
                 child: Text('Connect Barcode Scanner'),
               ),
@@ -112,13 +116,24 @@ class _MenuPageState extends State<MenuPage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => BarcodeScannerPage(),
-                    ),
+                    MaterialPageRoute(builder: (context) => BarcodeScannerPage()),
                   );
                 },
                 child: Text('Open Barcode Scanner'),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => BarcodeScannerCameraPage()),
+                  );
+                },
+                child: Text('Scan Barcode with Camera'),
+              ),
+              if (bluetoothManager.isConnected)
+                Text('Connected to ${bluetoothManager.connectedDevice?.name}'),
+              if (bluetoothManager.isConnected && bluetoothManager.data != null)
+                Text('Data: ${bluetoothManager.data}'),
             ],
           ),
         ),

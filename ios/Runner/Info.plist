@@ -51,5 +51,7 @@
     <string>We need your permission to use Bluetooth</string>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>We need your permission to access location while the app is in use.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Camera permission is required for barcode scanning.</string>
 </dict>
 </plist>

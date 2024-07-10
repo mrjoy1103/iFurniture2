@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fw_demo/utils/bluetooth_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:fw_demo/providers/inventory_provider.dart';
 import 'package:fw_demo/utils/routes.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => InventoryProvider(initialCriteria)),
+        ChangeNotifierProvider(create: (_) => BluetoothManager()),
       ],
       child: MaterialApp(
         title: 'Product Inventory',

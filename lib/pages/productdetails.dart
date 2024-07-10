@@ -8,11 +8,13 @@ import '../models/inventory.dart';
 import '../models/inventory_images.dart';
 import '../models/branch_inventory.dart';
 import '../services/api_services.dart';
+import '../utils/cam_scan_utility.dart';
 import '../utils/sharedprefutils.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:fw_demo/utils/relateditemswidget.dart';
 import 'package:fw_demo/utils/collectionitemswidget.dart';
 import 'package:fw_demo/utils/branchInventorygrid.dart';
+import 'barcodecamerascan.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final int itemNumber;
@@ -156,6 +158,24 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     );
   }
 
+  Future<void> _handleScannedBarcode(String barcode) async {
+    final inventoryProvider = Provider.of<InventoryProvider>(context, listen: false);
+    final itemNumber = int.tryParse(barcode);
+
+    if (itemNumber != null && inventoryProvider.containsItemNumber(itemNumber)) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductDetailsPage(itemNumber: itemNumber),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Product not found')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -171,6 +191,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             },
             icon: Icon(Icons.menu),
           ),
+          IconButton(onPressed: () async {
+            String? barcode = await BarcodeScannerUtil.scanBarcode();
+            if (barcode != null && barcode.isNotEmpty) {
+              _handleScannedBarcode(barcode);
+            }
+          },icon: Icon(Icons.camera_alt_outlined))
         ],
       ),
       body: FutureBuilder<Inventory>(
