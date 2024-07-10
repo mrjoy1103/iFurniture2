@@ -350,10 +350,15 @@ class ApiService {
                 final responseBody = jsonDecode(response.body);
                 print('Response body parsed: $responseBody');
 
-                if (responseBody['Result'] == 0) {
+                if (responseBody['Result'] == 0 ) {
                     List<dynamic> data = responseBody['Data'];
                     return data.map((item) => BranchInventory.fromJson(item)).toList();
-                } else {
+                } else if(responseBody['Result']==2 && responseBody['Data']!=null)
+                    {
+                        List<dynamic> data = responseBody['Data'];
+                        return data.map((item) => BranchInventory.fromJson(item)).toList();
+                    }
+                else  {
                     throw Exception(responseBody['Message']);
                 }
             } else {

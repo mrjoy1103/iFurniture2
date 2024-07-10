@@ -53,7 +53,7 @@ class BranchInventoryGrid extends StatelessWidget {
                     ]);
                   }).toList(),
                 ),
-                if (supplierInventory.isNotEmpty) ...[
+                if (supplierInventory.isNotEmpty  ) ...[
                   SizedBox(height: 20),
                   Text(
                     'Ashley Inventory',

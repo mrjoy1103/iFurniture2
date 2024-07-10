@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fw_demo/pages/serverConnect.dart';
+import 'package:fw_demo/utils/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:fw_demo/pages/barcodecamerascan.dart'; // Import the new BarcodeScannerCameraPage
 import 'lists_page.dart';
@@ -41,9 +43,10 @@ class _MenuPageState extends State<MenuPage> {
             child: Text('No'),
           ),
           TextButton(
-            onPressed: () => Navigator.pushReplacement(
+            onPressed: () => Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => LoginPage()),
+              MaterialPageRoute(builder: (context) => ServerAddressPage()),
+              ModalRoute.withName('/')
             ),
             child: Text('Yes'),
           ),

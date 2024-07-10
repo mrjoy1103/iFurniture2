@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fw_demo/pages/menuPage.dart';
 import 'package:fw_demo/utils/bluetooth_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:fw_demo/providers/inventory_provider.dart';
@@ -43,6 +44,8 @@ class MyApp extends StatelessWidget {
         initialRoute: MyRoutes.ipRoute,
         routes: {
           MyRoutes.ipRoute: (context) => ServerAddressPage(),
+          MyRoutes.loginRoute: (context) => LoginPage(),
+          MyRoutes.menupageRoute: (context) => MenuPage()
         },
         onGenerateRoute: (settings) {
           if (settings.name == MyRoutes.loginRoute) {
