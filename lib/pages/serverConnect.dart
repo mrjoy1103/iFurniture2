@@ -25,6 +25,8 @@ class _ServerAddressPageState extends State<ServerAddressPage> {
   int? _deviceID;
   String? _deviceName;
 
+  bool _switchvalue = false;
+
   @override
   void initState() {
     super.initState();
@@ -100,7 +102,11 @@ class _ServerAddressPageState extends State<ServerAddressPage> {
         _isLoading = true;
         _errorMessage = null;
       });
-      final serverAddress = 'http://${_serverAddressController.text.trim()}:9000';
+
+      final scheme = _switchvalue ? 'https' : 'http';
+      final port = _switchvalue ? '443' : '9000';
+
+      final serverAddress = '$scheme://${_serverAddressController.text.trim()}:$port';
       final deviceName = _deviceNameController.text.trim();
       await _saveData(serverAddress, deviceName);
 
@@ -176,6 +182,17 @@ class _ServerAddressPageState extends State<ServerAddressPage> {
                   textAlign: TextAlign.center,
                 ),
               ],
+
+              Switch(value: _switchvalue, onChanged: (bool value){
+                setState(() {
+                  _switchvalue = value;
+                });
+              },activeColor: Colors.green,),
+              const SizedBox(height: 10),
+              Text(
+                _switchvalue ? 'HTTPS Enabled' : 'HTTPS Disabled',
+                style: TextStyle(fontSize: 20),
+              ),
               const SizedBox(height: 20),
               Form(
                 key: _formKey,

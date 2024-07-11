@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:fw_demo/pages/productdetails.dart';
 import 'package:provider/provider.dart';
 import '../models/inventory.dart';
 import '../providers/inventory_provider.dart';
 import '../models/filter_criteria.dart';
 import '../utils/filterdialog.dart';
 import 'productdetails.dart';
-import 'package:fw_demo/utils/multiselectdialog.dart';
 
 class ProductInventoryPage extends StatefulWidget {
   final String serverAddress;
@@ -30,8 +28,8 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
     set: 0,
     category: [],
     supplier: [],
-    textFilter: '', subCategory: [],
-    //packagesOnly: false,
+    textFilter: '',
+    subCategory: [],
   );
 
   @override
@@ -62,8 +60,8 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
         set: 0,
         category: [],
         supplier: [],
-        textFilter: '', subCategory: [],
-        //packagesOnly: false,
+        textFilter: '',
+        subCategory: [],
       );
     });
     _inventoryProvider.updateFilterCriteria(_currentCriteria);
@@ -104,8 +102,6 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
                 ),
                 TextButton(
                   onPressed: () async {
-
-
                     setState(() {
                       isLoading = true;
                     });
@@ -151,7 +147,6 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
       setState(() {
         _currentCriteria = newCriteria;
       });
-      //await _inventoryProvider.updateFilterCriteria(newCriteria); // Correctly call the async method
     }
   }
 
@@ -180,38 +175,6 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
     Navigator.of(context).pop();
   }
 
-
-
-
-  Widget _buildMultiSelectDropdown(BuildContext context,
-      {required String title,
-        required List<String> items,
-        required List<String> selectedItems,
-        required ValueChanged<List<String>> onSelectionChanged}) {
-    return ListTile(
-      title: Text(title),
-      trailing: Icon(Icons.arrow_drop_down),
-      onTap: () async {
-        final List<String>? selected = await showDialog<List<String>>(
-          context: context,
-          builder: (BuildContext context) {
-            return MultiSelectDialog(
-              title: title,
-              items: items,
-              initialSelectedItems: selectedItems,
-            );
-          },
-        );
-
-        if (selected != null) {
-          onSelectionChanged(selected);
-        }
-      },
-    );
-  }
-
-
-
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -223,17 +186,8 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Product Inventory'),
-          backgroundColor: Colors.purple[700],
+          backgroundColor: Colors.white70,
           actions: [
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {
-                showSearch(
-                  context: context,
-                  delegate: InventorySearchDelegate(_inventoryProvider),
-                );
-              },
-            ),
             IconButton(
               icon: const Icon(Icons.filter_list),
               onPressed: _openFilterDialog,
@@ -292,8 +246,7 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => ProductDetailsPage(
-                                itemNumber: item.itemNumber
-                                //serverAddress: widget.serverAddress,
+                                itemNumber: item.itemNumber,
                               ),
                             ),
                           );
@@ -333,98 +286,6 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class InventorySearchDelegate extends SearchDelegate {
-  final InventoryProvider inventoryProvider;
-
-  InventorySearchDelegate(this.inventoryProvider);
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-          inventoryProvider.searchInventory(query);
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return const BackButton();
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    inventoryProvider.searchInventory(query);
-    return Consumer<InventoryProvider>(
-      builder: (context, inventoryProvider, child) {
-        if (inventoryProvider.inventory.isEmpty) {
-          return const Center(child: Text('No results found'));
-        }
-
-        return ListView.builder(
-          itemCount: inventoryProvider.inventory.length,
-          itemBuilder: (context, index) {
-            final item = inventoryProvider.inventory[index];
-            return ListTile(
-              title: Text(item.description),
-              subtitle: Text('Price: ${item.cost}'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProductDetailsPage(
-                      itemNumber: item.itemNumber
-                      //serverAddress: widget.serverAddress,
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    inventoryProvider.searchInventory(query);
-    return Consumer<InventoryProvider>(
-      builder: (context, inventoryProvider, child) {
-        if (inventoryProvider.inventory.isEmpty) {
-          return const Center(child: Text('No suggestions found'));
-        }
-
-        return ListView.builder(
-          itemCount: inventoryProvider.inventory.length,
-          itemBuilder: (context, index) {
-            final item = inventoryProvider.inventory[index];
-            return ListTile(
-              title: Text(item.description),
-              subtitle: Text('Price: ${item.cost}'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProductDetailsPage(
-                      itemNumber: item.itemNumber
-                      //serverAddress: inventoryProvider.serverAddress,
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        );
-      },
     );
   }
 }

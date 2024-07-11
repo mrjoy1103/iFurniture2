@@ -19,53 +19,13 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
   void initState() {
     super.initState();
     _loadServerAddress();
-    final bluetoothManager = Provider.of<BluetoothManager>(context, listen: false);
-    bluetoothManager.startScanning();
+
   }
 
   Future<void> _loadServerAddress() async {
     serverAddress = await SharedPreferencesUtil.getServerAddress();
-  }
-
-  Future<void> _handleScannedData(String data) async {
-
-    if (serverAddress == null) {
-      _showProductNotFound();
-      return;
-    }
-    final apiService = ApiService(baseUrl: serverAddress!);
-    try {
-      final inventoryProvider = Provider.of<InventoryProvider>(context, listen: false);
-      final itemNumber = int.tryParse(data);
-      if (itemNumber != null && inventoryProvider.containsItemNumber(itemNumber)) {
-        final product = await apiService.getProductByNumber(itemNumber);
-        if (product != null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProductDetailsPage(itemNumber: itemNumber),
-            ),
-          );
-        } else {
-          _showProductNotFound();
-        }
-      } else {
-        _showProductNotFound();
-      }
-    } catch (e) {
-      print("Error handling scanned data: $e");
-      _showProductNotFound();
-    }
-  }
-
-  void _showProductNotFound() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Product not found')),
-    );
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    final bluetoothManager = Provider.of<BluetoothManager>(context, listen: false);
+    bluetoothManager.setServerAddress(serverAddress!);
   }
 
   @override
@@ -79,6 +39,10 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
           IconButton(
             icon: Icon(bluetoothManager.isScanning ? Icons.stop : Icons.refresh),
             onPressed: bluetoothManager.isScanning ? null : bluetoothManager.startScanning,
+          ),
+          IconButton(
+            icon: Icon(Icons.bluetooth_disabled),
+            onPressed: bluetoothManager.disconnect,
           ),
         ],
       ),
@@ -105,10 +69,10 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
                 },
               ),
             ),
-            if (bluetoothManager.isConnected && bluetoothManager.data != null)
-              Text('Data: ${bluetoothManager.data}')
-            else
-              Text('Waiting for connection and data...'),
+            //if (bluetoothManager.isConnected && bluetoothManager.data != null)
+              //Text('Data: ${bluetoothManager.data}')
+            //else
+              //Text('Waiting for connection and data...'),
           ],
         ),
       ),

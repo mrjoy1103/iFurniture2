@@ -31,8 +31,6 @@ class InventoryProvider with ChangeNotifier {
   List<String> get collections => _collections;
   Map<String, List<String>> get categoriesWithSubcategories => _categoriesWithSubcategories;
 
-
-
   Future<void> fetchInventory(String baseUrl, {bool isLoadingMore = false}) async {
     if (_isLoading) return;
     _isLoading = true;
@@ -106,11 +104,12 @@ class InventoryProvider with ChangeNotifier {
 
   void searchInventory(String query) {
     if (query.isEmpty) {
-      _inventory = List.from(_originalInventory);
+      _applyFilters();
     } else {
       List<Inventory> searchResults = [];
-      searchResults.addAll(_originalInventory.where((item) => item.itemNumber.toString().contains(query)));
-      searchResults.addAll(_originalInventory.where((item) =>
+      List<Inventory> filteredInventory = _applyFiltersToList(_originalInventory, _currentCriteria);
+      searchResults.addAll(filteredInventory.where((item) => item.itemNumber.toString().contains(query)));
+      searchResults.addAll(filteredInventory.where((item) =>
       !searchResults.contains(item) &&
           item.description.toLowerCase().contains(query.toLowerCase())));
 
@@ -121,70 +120,14 @@ class InventoryProvider with ChangeNotifier {
     _safeNotifyListeners();
   }
 
-  Future<void> updateFilterCriteria(FilterCriteria criteria) async{
+  Future<void> updateFilterCriteria(FilterCriteria criteria) async {
     _currentCriteria = criteria;
     await _applyFilters();
     _isLoading = false;
   }
 
   Future<void> _applyFilters() async {
-    _inventory = _originalInventory.where((item) {
-      // Filter by availability (existing logic)
-      if (_currentCriteria.availability == 1 && !item.branchInventory.any((branch) => branch.inStock > 0)) {
-        print('Excluding item due to availability (In Stock): ${item.itemNumber}');
-        return false;
-      }
-      if (_currentCriteria.availability == 2 && !item.branchInventory.any((branch) => branch.onOrder > 0)) {
-        print('Excluding item due to availability (On Order): ${item.itemNumber}');
-        return false;
-      }
-      if (_currentCriteria.availability == 3 && !item.branchInventory.any((branch) => branch.available > 0)) {
-        print('Excluding item due to availability (Available): ${item.itemNumber}');
-        return false;
-      }
-
-      // Filter by supplier
-      if (_currentCriteria.supplier.isNotEmpty && !_currentCriteria.supplier.contains(item.supplier.supplierName)) {
-        print('Excluding item due to supplier: ${item.itemNumber}');
-        return false;
-      }
-
-      // Filter by style
-      if (_currentCriteria.style.isNotEmpty && !_currentCriteria.style.contains(item.style)) {
-        print('Excluding item due to style: ${item.itemNumber}');
-        return false;
-      }
-
-      // Filter by collection
-      if (_currentCriteria.collection.isNotEmpty && !_currentCriteria.collection.contains(item.collection.collection)) {
-        print('Excluding item due to collection: ${item.itemNumber}');
-        return false;
-      }
-
-      // Filter by category
-      if (_currentCriteria.category.isNotEmpty && !_currentCriteria.category.contains(item.category)) {
-        print('Excluding item due to category: ${item.itemNumber}');
-        return false;
-      }
-      if (_currentCriteria.subCategory.isNotEmpty && !_currentCriteria.subCategory.contains(item.subCategory)) {
-        print('Excluding item due to subCategory: ${item.itemNumber}');
-        return false;
-      }
-
-      // Filter by text
-      if (_currentCriteria.textFilter.isNotEmpty && !item.description.toLowerCase().contains(_currentCriteria.textFilter.toLowerCase())) {
-        print('Excluding item due to textFilter: ${item.itemNumber}');
-        return false;
-      }
-
-      // Filter by packages only
-      // if (_currentCriteria.packagesOnly && !item.isPackage) {
-      //   print('Excluding item due to packagesOnly: ${item.itemNumber}');
-      //   return false;
-      // }
-
-      return true;
-    }).toList();
+    _inventory = _applyFiltersToList(_originalInventory, _currentCriteria);
 
     // Debug print after filtering
     print('Filtered inventory count: ${_inventory.length}');
@@ -206,6 +149,51 @@ class InventoryProvider with ChangeNotifier {
     });
     _isLoading = false;
     _safeNotifyListeners();
+  }
+
+  List<Inventory> _applyFiltersToList(List<Inventory> inventoryList, FilterCriteria criteria) {
+    return inventoryList.where((item) {
+      // Filter by availability (existing logic)
+      if (criteria.availability == 1 && !item.branchInventory.any((branch) => branch.inStock > 0)) {
+        return false;
+      }
+      if (criteria.availability == 2 && !item.branchInventory.any((branch) => branch.onOrder > 0)) {
+        return false;
+      }
+      if (criteria.availability == 3 && !item.branchInventory.any((branch) => branch.available > 0)) {
+        return false;
+      }
+
+      // Filter by supplier
+      if (criteria.supplier.isNotEmpty && !criteria.supplier.contains(item.supplier.supplierName)) {
+        return false;
+      }
+
+      // Filter by style
+      if (criteria.style.isNotEmpty && !criteria.style.contains(item.style)) {
+        return false;
+      }
+
+      // Filter by collection
+      if (criteria.collection.isNotEmpty && !criteria.collection.contains(item.collection.collection)) {
+        return false;
+      }
+
+      // Filter by category
+      if (criteria.category.isNotEmpty && !criteria.category.contains(item.category)) {
+        return false;
+      }
+      if (criteria.subCategory.isNotEmpty && !criteria.subCategory.contains(item.subCategory)) {
+        return false;
+      }
+
+      // Filter by text
+      if (criteria.textFilter.isNotEmpty && !item.description.toLowerCase().contains(criteria.textFilter.toLowerCase())) {
+        return false;
+      }
+
+      return true;
+    }).toList();
   }
 
   bool containsItemNumber(int itemNumber) {

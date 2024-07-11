@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
+import 'package:fw_demo/utils/slidingbar.dart';
 import 'package:provider/provider.dart';
 import '../services/api_services.dart';
 import 'productdetails.dart';
@@ -55,20 +56,40 @@ class _BarcodeScannerCameraPageState extends State<BarcodeScannerCameraPage> {
             ),
           );
         } else {
-          _showProductNotFound();
+          showSlidingBar(context, 'Product not found', isError: true);
         }
       } else {
-        _showProductNotFound();
+        showSlidingBar(context, 'Product not found', isError: true);
       }
     } catch (e) {
       print("Error handling scanned data: $e");
-      _showProductNotFound();
+      showSlidingBar(context, 'Product not found', isError: true);
     }
+  }
+  void showSlidingBar(BuildContext context, String message, {bool isError = false}) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 0,
+        left: 0,
+        right: 0,
+        child: SlidingBar(
+          message: message,
+          isError: isError,
+        ),
+      ),
+    );
+
+    overlay?.insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: 3), () {
+      overlayEntry.remove();
+    });
   }
 
   void _showProductNotFound() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Product not found')),
+      SnackBar(content: Text('Server Address Error')),
     );
   }
 
@@ -91,7 +112,7 @@ class _BarcodeScannerCameraPageState extends State<BarcodeScannerCameraPage> {
               child: Text('Start Scanning'),
             ),
             if (scannedBarcode != null)
-              Text('Scanned Code: $scannedBarcode'),
+              //Text('Scanned Code: $scannedBarcode'),
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context); // Return to the previous page

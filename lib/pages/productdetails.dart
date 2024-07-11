@@ -14,6 +14,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:fw_demo/utils/relateditemswidget.dart';
 import 'package:fw_demo/utils/collectionitemswidget.dart';
 import 'package:fw_demo/utils/branchInventorygrid.dart';
+import '../utils/slidingbar.dart';
 import 'barcodecamerascan.dart';
 
 class ProductDetailsPage extends StatefulWidget {
@@ -170,10 +171,29 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Product not found')),
-      );
+      showSlidingBar(context, 'Product not found', isError: true);
     }
+  }
+
+  void showSlidingBar(BuildContext context, String message, {bool isError = false}) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 0,
+        left: 0,
+        right: 0,
+        child: SlidingBar(
+          message: message,
+          isError: isError,
+        ),
+      ),
+    );
+
+    overlay?.insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: 3), () {
+      overlayEntry.remove();
+    });
   }
 
   @override
@@ -302,8 +322,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildStatusCircle('I', inStockCount > 0 ? Colors.green : Colors.grey, inStockCount.toInt(), product.model),
-                      _buildStatusCircle('A', availableCount > 0 ? Colors.blue : Colors.grey, availableCount.toInt(), product.model),
+                      _buildStatusCircle('I', inStockCount > 0 ? Colors.blue : Colors.grey, inStockCount.toInt(), product.model),
+                      _buildStatusCircle('A', availableCount > 0 ? Colors.green : Colors.grey, availableCount.toInt(), product.model),
                       _buildStatusCircle('O', onOrderCount > 0 ? Colors.red : Colors.grey, onOrderCount.toInt(), product.model),
                     ],
                   ),

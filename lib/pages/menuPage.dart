@@ -3,6 +3,7 @@ import 'package:fw_demo/pages/serverConnect.dart';
 import 'package:fw_demo/utils/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:fw_demo/pages/barcodecamerascan.dart'; // Import the new BarcodeScannerCameraPage
+import 'package:shared_preferences/shared_preferences.dart';
 import 'lists_page.dart';
 import 'login.dart';
 import 'product_inventory.dart';
@@ -22,13 +23,31 @@ class _MenuPageState extends State<MenuPage> {
   void initState() {
     super.initState();
     _loadServerAddress();
+    //_initializeBluetoothManager();
+
+
   }
+
+  Future<void> _initializeBluetoothManager() async {
+     final bluetoothManager = Provider.of<BluetoothManager>(context, listen: false);
+     bluetoothManager.setContext(context);
+    // Set the server address here if needed
+     String? _serverAddress = await SharedPreferencesUtil.getServerAddress();
+     bluetoothManager.setServerAddress(_serverAddress!);
+
+     // Retrieve your condition to start scanning
+      bluetoothManager.startScanning();
+     // Check the condition before starting scanning
+
+   }
 
   Future<void> _loadServerAddress() async {
     String? serverAddress = await SharedPreferencesUtil.getServerAddress();
     setState(() {
       _serverAddress = serverAddress;
     });
+
+
   }
 
   Future<bool> _onWillPop() async {
@@ -57,7 +76,10 @@ class _MenuPageState extends State<MenuPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bluetoothManager = Provider.of<BluetoothManager>(context);
+    String serverAddress = _serverAddress!;
+    final bluetoothManager = Provider.of<BluetoothManager>(context,listen: false);
+    bluetoothManager.setContext(context);
+    bluetoothManager.setServerAddress(serverAddress);
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -111,19 +133,20 @@ class _MenuPageState extends State<MenuPage> {
               ),
               ElevatedButton(
                 onPressed: () {
+                  _initializeBluetoothManager();
 
                 },
                 child: Text('Connect Barcode Scanner'),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => BarcodeScannerPage()),
-                  );
-                },
-                child: Text('Open Barcode Scanner'),
-              ),
+              // ElevatedButton(
+              //   onPressed: () {
+              //     // Navigator.push(
+              //     //   context,
+              //     //   MaterialPageRoute(builder: (context) => BarcodeScannerPage()),
+              //    // );
+              //   },
+              //   child: Text('Open Barcode Scanner'),
+             // ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -133,10 +156,22 @@ class _MenuPageState extends State<MenuPage> {
                 },
                 child: Text('Scan Barcode with Camera'),
               ),
-              if (bluetoothManager.isConnected)
-                Text('Connected to ${bluetoothManager.connectedDevice?.name}'),
-              if (bluetoothManager.isConnected && bluetoothManager.data != null)
-                Text('Data: ${bluetoothManager.data}'),
+              Consumer<BluetoothManager>(
+                builder: (context, bluetoothManager, child) {
+                  return Visibility(
+                    visible: bluetoothManager.isConnected,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        bluetoothManager.disconnect();
+                      },
+                      child: Text('Disconnect'),
+                    ),
+                  );
+                },
+              ),
+
+
+
             ],
           ),
         ),
