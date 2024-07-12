@@ -103,13 +103,23 @@ class InventoryProvider with ChangeNotifier {
   }
 
   void searchInventory(String query) {
+    // if (query.isEmpty) {
+    //   _applyFilters();
+    // } else {
+    //   List<Inventory> searchResults = [];
+    //   List<Inventory> filteredInventory = _applyFiltersToList(_originalInventory, _currentCriteria);
+    //   searchResults.addAll(filteredInventory.where((item) => item.itemNumber.toString().contains(query)));
+    //   searchResults.addAll(filteredInventory.where((item) =>
+    //   !searchResults.contains(item) &&
+    //       item.description.toLowerCase().contains(query.toLowerCase())));
+    //
+    //   _inventory = searchResults;
     if (query.isEmpty) {
       _applyFilters();
     } else {
       List<Inventory> searchResults = [];
-      List<Inventory> filteredInventory = _applyFiltersToList(_originalInventory, _currentCriteria);
-      searchResults.addAll(filteredInventory.where((item) => item.itemNumber.toString().contains(query)));
-      searchResults.addAll(filteredInventory.where((item) =>
+      searchResults.addAll(_inventory.where((item) => item.itemNumber.toString().contains(query)));
+      searchResults.addAll(_inventory.where((item) =>
       !searchResults.contains(item) &&
           item.description.toLowerCase().contains(query.toLowerCase())));
 

@@ -43,9 +43,9 @@ class _LoadingPageState extends State<LoadingPage> {
     final screenWidth = mediaQuery.size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Loading Data'),
-      ),
+      /*appBar: AppBar(
+        title: Text(''),
+      ),*/
       body: Center(
         child: Consumer<InventoryProvider>(
           builder: (context, inventoryProvider, child) {

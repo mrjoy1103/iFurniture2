@@ -24,7 +24,8 @@ class SuccessPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sign In'),
+        title: Text(''),
+        automaticallyImplyLeading: false,
       ),
       body: Center(
         child: SingleChildScrollView(

@@ -129,7 +129,7 @@ class _ListsPageState extends State<ListsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lists'),
+        title: Text(''),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())

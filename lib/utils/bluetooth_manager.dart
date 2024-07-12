@@ -159,7 +159,7 @@ class BluetoothManager extends ChangeNotifier {
   void _showProductNotFound() {
     if (_context != null && _context!.mounted) {
       ScaffoldMessenger.of(_context!).showSnackBar(
-        SnackBar(content: Text('Product not found')),
+        SnackBar(content: Text('Product not found',textAlign: TextAlign.center,),backgroundColor: Colors.redAccent,),
       );
     }
   }

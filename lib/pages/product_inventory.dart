@@ -65,6 +65,7 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
       );
     });
     _inventoryProvider.updateFilterCriteria(_currentCriteria);
+    
   }
 
   Future<void> _openFilterDialog() async {
@@ -117,22 +118,7 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
                 ),
                 TextButton(
                   onPressed: () {
-                    setState(() {
-                      tempCriteria = FilterCriteria(
-                        pageSize: 20000,
-                        pageNum: 1,
-                        style: [],
-                        availability: 0,
-                        sortby: 0,
-                        collection: [],
-                        set: 0,
-                        category: [],
-                        supplier: [],
-                        subCategory: [], // Clear subcategories
-                        textFilter: '',
-                      );
-                    });
-                    Navigator.pop(context, tempCriteria);
+                    _clearFilters();
                   },
                   child: const Text('Clear Filters'),
                 ),
@@ -185,7 +171,7 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
       value: _inventoryProvider,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Product Inventory'),
+          title: const Text(''),
           backgroundColor: Colors.white70,
           actions: [
             IconButton(

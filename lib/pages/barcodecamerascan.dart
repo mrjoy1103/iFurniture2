@@ -99,29 +99,30 @@ class _BarcodeScannerCameraPageState extends State<BarcodeScannerCameraPage> {
 
   @override
   Widget build(BuildContext context) {
+    _scanBarcode;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Barcode Scanner Camera'),
+        title: Text(''),
       ),
-      body: Center(
+       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: _scanBarcode,
-              child: Text('Start Scanning'),
-            ),
-            if (scannedBarcode != null)
-              //Text('Scanned Code: $scannedBarcode'),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); // Return to the previous page
-              },
-              child: Text('Back'),
-            ),
-          ],
-        ),
-      ),
+           mainAxisAlignment: MainAxisAlignment.center,
+           children: [
+             ElevatedButton(
+               onPressed: _scanBarcode,
+               child: Text('Start Scanning'),
+             ),
+             if (scannedBarcode != null)
+               //Text('Scanned Code: $scannedBarcode'),
+             ElevatedButton(
+               onPressed: () {
+                  Navigator.pop(context); // Return to the previous page
+               },
+               child: Text('Back'),
+             ),
+           ],
+         ),
+       ),
     );
   }
 }

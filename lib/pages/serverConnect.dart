@@ -159,7 +159,8 @@ class _ServerAddressPageState extends State<ServerAddressPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Enter Server Address'),
+        title: const Text(''),
+        automaticallyImplyLeading: false,
       ),
       body: Center(
         child: SingleChildScrollView(

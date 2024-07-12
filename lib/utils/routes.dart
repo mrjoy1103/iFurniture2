@@ -7,5 +7,6 @@ class MyRoutes {
   static String productDetailsRoute = "/product";
   static String listspageRoute  = "/lists";
   static String menupageRoute = "/menu";
+  static String settingspageRoute = "/settings";
 
 }
