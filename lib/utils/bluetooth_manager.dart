@@ -1,20 +1,25 @@
 import 'dart:async';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:fw_demo/models/listedItem.dart';
 import 'package:fw_demo/pages/productdetails.dart';
+import 'package:fw_demo/utils/sharedprefutils.dart';
 import 'package:provider/provider.dart';
 import '../services/api_services.dart';
 import '../providers/inventory_provider.dart';
 
 class BluetoothManager extends ChangeNotifier {
   static final BluetoothManager _instance = BluetoothManager._internal();
-  factory BluetoothManager() => _instance;
+  factory BluetoothManager(GlobalKey<NavigatorState> navigatorKey) {
+    _instance._navigatorKey = navigatorKey;
+    return _instance;
+  }
   BluetoothManager._internal();
 
+  GlobalKey<NavigatorState>? _navigatorKey;
   bool isConnected = false;
   bool isScanning = false;
   BluetoothDevice? connectedDevice;
-  BuildContext? _context;
   String? _serverAddress;
   final String targetDeviceKeyword = "OPN2006";
   final Guid serviceUUID = Guid("46409BE5-6967-4557-8E70-784E1E55263B");
@@ -24,18 +29,23 @@ class BluetoothManager extends ChangeNotifier {
   Map<BluetoothDevice, List<BluetoothService>> _deviceServices = {};
   Map<Guid, StreamSubscription<List<int>>> _characteristicSubscriptions = {};
 
+  String currentPage = "otherThanLists";
+  int _currentListid = -1;
+
   List<ScanResult> get scanResults => _scanResults;
   Map<BluetoothDevice, List<BluetoothService>> get deviceServices => _deviceServices;
 
-  void setContext(BuildContext context) {
-    _context = context;
-  }
+  void Function()? onItemAddedCallback; // Callback function
 
   void setServerAddress(String serverAddress) {
     _serverAddress = serverAddress;
   }
-
-  void startScanning() {
+  void setCurrentPage(String page, int listid) {
+    currentPage = page;
+    _currentListid = listid;
+    notifyListeners();
+  }
+    void startScanning() {
     if (isConnected || isScanning) return;
     isScanning = true;
     notifyListeners();
@@ -72,12 +82,22 @@ class BluetoothManager extends ChangeNotifier {
       isConnected = true;
       connectedDevice = device;
       notifyListeners();
-      print("Connected to device: ${device.name}");
 
+      // Initiate service discovery after successful connection
+      await discoverServices(device);
+    } catch (error) {
+      print("Error connecting to device: $error");
+      isConnected = false;
+      connectedDevice = null;
+      notifyListeners();
+    }
+  }
+
+  Future<void> discoverServices(BluetoothDevice device) async {
+    try {
       List<BluetoothService> services = await device.discoverServices();
       _deviceServices[device] = services;
 
-      // Only look for the specific service
       BluetoothService? targetService = services.firstWhere(
             (service) => service.uuid == serviceUUID,
         //orElse: () => null,
@@ -91,12 +111,7 @@ class BluetoothManager extends ChangeNotifier {
               _characteristicSubscriptions[characteristic.uuid]!.cancel();
             }
             _characteristicSubscriptions[characteristic.uuid] = characteristic.value.listen((value) async {
-              print("Received data from characteristic: ${value}");
-              String scannedData = String.fromCharCodes(value);
-              print("Scanned data: $scannedData");
-
-              await _handleScannedData(scannedData);
-              notifyListeners();
+              await _handleData(value);
             });
           }
         }
@@ -104,7 +119,7 @@ class BluetoothManager extends ChangeNotifier {
         print("Target service not found");
       }
     } catch (error) {
-      print("Error connecting to device: $error");
+      print("Error discovering services: $error");
     }
   }
 
@@ -123,44 +138,74 @@ class BluetoothManager extends ChangeNotifier {
     }
   }
 
+  Future<void> _handleData(List<int> value) async {
+    String scannedData = String.fromCharCodes(value);
+    print("Received data from characteristic: ${value}");
+    print("Scanned data: $scannedData");
+
+    _handleScannedData(scannedData);
+    print("After Scanning data");
+    notifyListeners();
+  }
+
   Future<void> _handleScannedData(String data) async {
+
     if (_serverAddress == null) {
-      _showProductNotFound();
-      return;
+      _serverAddress = await SharedPreferencesUtil.getServerAddress();
+      print("Server error");
+      //_showProductNotFound();
+      //return;
     }
+    print("You are in the function");
     final apiService = ApiService(baseUrl: _serverAddress!);
     try {
-      final inventoryProvider = Provider.of<InventoryProvider>(_context!, listen: false);
+      final inventoryProvider = Provider.of<InventoryProvider>(_navigatorKey!.currentContext!, listen: false);
       final itemNumber = int.tryParse(data);
       print("Here is the parsed data $itemNumber");
       if (itemNumber != null && inventoryProvider.containsItemNumber(itemNumber)) {
+
         final product = await apiService.getProductByNumber(itemNumber);
-        if (product != null) {
-          if (_context != null) {
-            Navigator.push(
-              _context!,
-              MaterialPageRoute(
-                builder: (context) => ProductDetailsPage(itemNumber: itemNumber),
-              ),
-            );
-          }
-        } else {
-          _showProductNotFound();
+        if (currentPage == "ListsPage" && product!=null){
+          //inventoryProvider.addItemToList(itemNumber);
+          ListedItem listedItem = ListedItem(listId: _currentListid, itemNumber: itemNumber, price: product.retail!);
+          await apiService.addItemToList(listedItem);
+
+          ScaffoldMessenger.of(_navigatorKey!.currentContext!).showSnackBar(
+            SnackBar(content: Text('Item added to the list', textAlign: TextAlign.center), backgroundColor: Colors.green, duration: Duration(milliseconds: 150),),
+          );
+          currentPage = "otherThanList";
+        }
+        else {
+          _navigatorKey!.currentState?.push(
+            MaterialPageRoute(
+              builder: (context) => ProductDetailsPage(itemNumber: itemNumber),
+            ),
+          );
         }
       } else {
+        print("you are in second if else");
         _showProductNotFound();
       }
     } catch (e) {
       print("Error handling scanned data: $e");
       _showProductNotFound();
     }
+
+    if (onItemAddedCallback != null) {
+      onItemAddedCallback!();
+    }
   }
 
   void _showProductNotFound() {
-    if (_context != null && _context!.mounted) {
-      ScaffoldMessenger.of(_context!).showSnackBar(
-        SnackBar(content: Text('Product not found',textAlign: TextAlign.center,),backgroundColor: Colors.redAccent,),
+    final context = _navigatorKey?.currentContext;
+    if (context != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Product not found', textAlign: TextAlign.center,), backgroundColor: Colors.redAccent,duration: Duration(milliseconds: 10),),
       );
     }
+  }
+
+  void setOnItemAddedCallback(void Function() callback) {
+    onItemAddedCallback = callback;
   }
 }

@@ -81,6 +81,8 @@ class InventoryProvider with ChangeNotifier {
     }
   }
 
+
+
   Future<void> fetchFilterData() async {
     try {
       ApiService apiService = ApiService(baseUrl: _baseUrl);
@@ -209,6 +211,16 @@ class InventoryProvider with ChangeNotifier {
   bool containsItemNumber(int itemNumber) {
     return _inventory.any((item) => item.itemNumber == itemNumber);
   }
+
+  double? getInventoryItemByNumber(int itemNumber) {
+    try {
+      return _inventory.firstWhere((item) => item.itemNumber == itemNumber).retail!;
+    } catch (e) {
+      print('Item not found: $e');
+      return null;
+    }
+  }
+
 
   void _safeNotifyListeners() {
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {

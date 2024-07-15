@@ -16,6 +16,7 @@ class _BarcodeScannerCameraPageState extends State<BarcodeScannerCameraPage> {
   String? serverAddress;
   String? scannedBarcode;
 
+
   @override
   void initState() {
     super.initState();
@@ -27,6 +28,7 @@ class _BarcodeScannerCameraPageState extends State<BarcodeScannerCameraPage> {
   }
 
   Future<void> _scanBarcode() async {
+
     var result = await BarcodeScanner.scan();
     setState(() {
       scannedBarcode = result.rawContent;

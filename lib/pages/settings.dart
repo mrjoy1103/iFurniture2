@@ -1,12 +1,10 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:fw_demo/pages/login.dart';
-import 'package:fw_demo/pages/menuPage.dart';
 import 'package:fw_demo/utils/bluetooth_manager.dart';
 import 'package:fw_demo/utils/sharedprefutils.dart';
 import 'package:provider/provider.dart';
-//import 'package:package_info_plus/package_info_plus.dart';
 import '../providers/inventory_provider.dart';
-
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -17,53 +15,24 @@ class _SettingsPageState extends State<SettingsPage> {
   String _appVersion = '1.0.0';
   String _companyName = 'New Vision Information Systems';
   String _apiServerVersion = '2.2.3'; // Example value, you might want to fetch this from the server
-  //bool _serverHealth = false;
-
 
   @override
   void initState() {
     super.initState();
-    //_loadAppVersion();
   }
 
-  Future<void> _initializeBluetoothManager() async {
+  // Start scanning for Bluetooth devices
+  void _startScanning() {
     final bluetoothManager = Provider.of<BluetoothManager>(context, listen: false);
-    bluetoothManager.setContext(context);
-    // Set the server address here if needed
-    String? _serverAddress = await SharedPreferencesUtil.getServerAddress();
-    bluetoothManager.setServerAddress(_serverAddress!);
-
-    // Retrieve your condition to start scanning
-    bluetoothManager.startScanning();
-    // Check the condition before starting scanning
-
+    bluetoothManager.startScanning(); // Start scanning
   }
 
-  // Future<void> _loadAppVersion() async {
-  //   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  //   setState(() {
-  //     _appVersion = packageInfo.version;
-  //   });
-  // }
-
-  // Future<void> _checkServerHealth() async {
-  //   // Add your logic to check server health here
-  //   setState(() {
-  //     _serverHealth = true; // Example: Set to true if the server is healthy
-  //   });
-  // }
-
-  void _connectBarcodeScanner() {
-    // Add your logic to connect the barcode scanner here
-  }
-
-  void _disconnectBarcodeScanner() {
-    // Add your logic to disconnect the barcode scanner here
-  }
-
-
-
+  // Logout and disconnect Bluetooth if connected
   void _logout() {
+    final bluetoothManager = Provider.of<BluetoothManager>(context, listen: false);
+    if (bluetoothManager.isConnected) {
+      bluetoothManager.disconnect();
+    }
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => LoginPage()),
@@ -72,8 +41,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final inventoryProvider = Provider.of<InventoryProvider>(context, listen: false);
-    final bluetoothManager = Provider.of<BluetoothManager>(context, listen: false);
+    final bluetoothManager = Provider.of<BluetoothManager>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -97,21 +65,13 @@ class _SettingsPageState extends State<SettingsPage> {
               title: Text('API Server Version'),
               subtitle: Text(_apiServerVersion),
             ),
-            // ListTile(
-            //   title: Text('Server Health'),
-            //   subtitle: Text(_serverHealth ? 'Healthy' : 'Unhealthy'),
-            //   trailing: ElevatedButton(
-            //     onPressed: _checkServerHealth,
-            //     child: Text('Check Server Health'),
-            //   ),
-            // ),
             ListTile(
               title: Text('Barcode Scanner'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ElevatedButton(
-                    onPressed: _initializeBluetoothManager,
+                    onPressed: _startScanning, // Start Bluetooth scanning
                     child: Text('Connect'),
                   ),
                   SizedBox(width: 8),
@@ -121,7 +81,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         visible: bluetoothManager.isConnected,
                         child: ElevatedButton(
                           onPressed: () {
-                            bluetoothManager.disconnect();
+                            bluetoothManager.disconnect(); // Disconnect Bluetooth
                           },
                           child: Text('Disconnect'),
                         ),
@@ -133,14 +93,158 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-
-              onPressed: (){
-                if (bluetoothManager.isConnected)
-                  bluetoothManager.disconnect();
-                _logout();
-              },
+              onPressed: _logout, // Logout and disconnect Bluetooth if needed
               child: Text('Logout'),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+*/
+import 'package:flutter/material.dart';
+import 'package:fw_demo/pages/login.dart';
+import 'package:fw_demo/utils/bluetooth_manager.dart';
+import 'package:fw_demo/utils/sharedprefutils.dart';
+import 'package:provider/provider.dart';
+import '../providers/inventory_provider.dart';
+
+class SettingsPage extends StatefulWidget {
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  String _appVersion = '1.0.0';
+  String _companyName = 'New Vision Information Systems';
+  String _apiServerVersion = '2.2.3'; // Example value, you might want to fetch this from the server
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  // Start scanning for Bluetooth devices
+  void _startScanning() {
+    final bluetoothManager = Provider.of<BluetoothManager>(context, listen: false);
+    bluetoothManager.startScanning(); // Start scanning
+  }
+
+  // Logout and disconnect Bluetooth if connected
+  void _logout() {
+    final bluetoothManager = Provider.of<BluetoothManager>(context, listen: false);
+    if (bluetoothManager.isConnected) {
+      bluetoothManager.disconnect();
+    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bluetoothManager = Provider.of<BluetoothManager>(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Settings', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.blueAccent,
+        automaticallyImplyLeading: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: ListTile(
+                title: Text('App Version', style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(_appVersion),
+              ),
+            ),
+            SizedBox(height: 10),
+            Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: ListTile(
+                title: Text('Build By', style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(_companyName),
+              ),
+            ),
+            SizedBox(height: 10),
+            Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: ListTile(
+                title: Text('API Server Version', style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(_apiServerVersion),
+              ),
+            ),
+            SizedBox(height: 10),
+            Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: ListTile(
+                title: Text('Barcode Scanner', style: TextStyle(fontWeight: FontWeight.bold)),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _startScanning, // Start Bluetooth scanning
+                      child: Text('Connect'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Consumer<BluetoothManager>(
+                      builder: (context, bluetoothManager, child) {
+                        return Visibility(
+                          visible: bluetoothManager.isConnected,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              bluetoothManager.disconnect(); // Disconnect Bluetooth
+                            },
+                            child: Text('Disconnect'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _logout, // Logout and disconnect Bluetooth if needed
+              child: Text('Logout'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
             ),
           ],
         ),
