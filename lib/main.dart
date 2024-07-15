@@ -10,6 +10,8 @@ import 'package:fw_demo/pages/loginSucces.dart';
 import 'package:fw_demo/pages/product_inventory.dart';
 import 'models/filter_criteria.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() {
   runApp(MyApp());
 }
@@ -34,9 +36,10 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => InventoryProvider(initialCriteria)),
-        ChangeNotifierProvider(create: (_) => BluetoothManager()),
+        ChangeNotifierProvider(create: (_) => BluetoothManager(navigatorKey)),
       ],
       child: MaterialApp(
+        navigatorKey: navigatorKey,
         title: 'Product Inventory',
         theme: ThemeData(
           primarySwatch: Colors.blue,
