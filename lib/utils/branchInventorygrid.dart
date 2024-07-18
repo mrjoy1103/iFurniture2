@@ -13,13 +13,19 @@ class BranchInventoryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<BranchInventory> regularBranchInventory = branchInventory
-        .where((branch) => branch.branchID == 10 || branch.branchID == 20)
-        .toList();
-    List<BranchInventory> supplierInventory = branchInventory
-        .where((branch) => branch.branchID != 10 && branch.branchID != 20)
-        .toList();
+    int supplierStartIndex = branchInventory.indexWhere((branch) => branch.branchName.startsWith('Today'));
 
+    // If there is no such branch, set supplierStartIndex to the length of the list (i.e., no supplier inventory)
+    if (supplierStartIndex == -1) {
+      supplierStartIndex = branchInventory.length;
+    }
+
+    // Split the list into regular and supplier inventory based on the found index
+    List<BranchInventory> regularBranchInventory = branchInventory.sublist(0, supplierStartIndex);
+    List<BranchInventory> supplierInventory = branchInventory.sublist(supplierStartIndex);
+
+
+    List<String> supplierBranchNames = supplierInventory.map((branch) => branch.branchName).toList();
     return Scaffold(
       appBar: AppBar(
         title: Text('Branch Inventory Details'),
@@ -40,7 +46,7 @@ class BranchInventoryGrid extends StatelessWidget {
                 DataTable(
                   columns: [
                     DataColumn(label: Text('Location')),
-                    DataColumn(label: Text('In Stock')), // Remove modelNumber
+                    DataColumn(label: Text('In Stock')),
                     DataColumn(label: Text('Available')),
                     DataColumn(label: Text('On Order')),
                   ],
@@ -53,23 +59,31 @@ class BranchInventoryGrid extends StatelessWidget {
                     ]);
                   }).toList(),
                 ),
-                if (supplierInventory.isNotEmpty  ) ...[
+                if (supplierInventory.isNotEmpty) ...[
                   SizedBox(height: 20),
                   Text(
                     'Ashley Inventory',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  DataTable(
-                    columns: [
-                      DataColumn(label: Text('Model')),
-                      DataColumn(label: Text('$itemNumber')), // Use itemNumber
-                    ],
-                    rows: supplierInventory.map((branch) {
-                      return DataRow(cells: [
-                        DataCell(Text(branch.branchName)),
-                        DataCell(Text(branch.inStock.toInt().toString())),
-                      ]);
-                    }).toList(),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: DataTable(
+                      columns: [
+                        DataColumn(label: Text('Model')),
+                        //DataColumn(label: Text('$itemNumber')),
+                        ...supplierBranchNames.map((branchName) => DataColumn(label: Text(branchName))).toList(),
+                      ],
+                      rows: [
+                        DataRow(cells: [
+                          //DataCell(Text('Model')),
+                          DataCell(Text('$itemNumber')),
+                          ...supplierBranchNames.map((branchName) {
+                            BranchInventory? branch = supplierInventory.firstWhere((b) => b.branchName == branchName);
+                            return DataCell(Text(branch.inStock.toInt().toString()));
+                          }).toList(),
+                        ]),
+                      ],
+                    ),
                   ),
                 ],
               ],

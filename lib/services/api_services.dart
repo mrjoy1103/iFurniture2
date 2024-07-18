@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:fw_demo/utils/sharedprefutils.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
+import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/branch_inventory.dart';
 import '../models/cipherInventory.dart';
@@ -330,6 +332,36 @@ class ApiService {
         }
     }
 
+    Future<void> addItemImage(ItemImage itemImage, int itemNumber) async {
+        await _loadDeviceName();
+        final url = Uri.parse('$baseUrl/Inventory/AddImageToItem');
+        try {
+            final response = await http.post(
+                url,
+                headers: <String, String>{
+                    'Content-Type': 'application/json; charset=UTF-8',
+                    'deviceName': deviceName,
+                },
+                body: jsonEncode({
+                    'itemNumber': itemNumber,
+                    'fileName': itemImage.fileName,
+                    'base64Image': itemImage.imageBase64,
+                }),
+            );
+
+            if (response.statusCode == 200) {
+                print("Image added Successfully");
+
+            } else {
+                throw Exception('Failed to add image to item. Status code: ${response.statusCode}');
+            }
+        } catch (e) {
+            print('Error adding image to item: $e');
+            throw e;
+        }
+    }
+
+
     Future<List<BranchInventory>> getBranchInventory(int itemNumber) async {
         await _loadDeviceName();
         final url = Uri.parse('$baseUrl/Inventory/GetItemBranchDetails?id=$itemNumber');
@@ -453,6 +485,8 @@ class ApiService {
             throw e;
         }
     }
+
+    
 
     Future<void> clearList(int id) async {
         await _loadDeviceName();

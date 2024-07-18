@@ -133,14 +133,14 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   // Logout and disconnect Bluetooth if connected
-  void _logout() {
+  void logout(BuildContext context) {
     final bluetoothManager = Provider.of<BluetoothManager>(context, listen: false);
     if (bluetoothManager.isConnected) {
       bluetoothManager.disconnect();
     }
-    Navigator.pushReplacement(
-      context,
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => LoginPage()),
+        (Route<dynamic> route) => false,
     );
   }
 
@@ -237,7 +237,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _logout, // Logout and disconnect Bluetooth if needed
+              onPressed: () => logout(context), // Logout and disconnect Bluetooth if needed
               child: Text('Logout'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,

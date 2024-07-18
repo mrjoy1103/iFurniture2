@@ -167,6 +167,8 @@ class _ListsPageState extends State<ListsPage> {
     );
   }
 }*/
+import 'package:barcode_scan2/gen/protos/protos.pbenum.dart';
+import 'package:barcode_scan2/platform_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:fw_demo/models/cipherInventory.dart';
@@ -600,6 +602,7 @@ class _ListItemsPageState extends State<ListItemsPage> {
   late ApiService _apiService;
   bool _isLoading = true;
   List<ListedItem> _listItems = [];
+  bool _isScanning = false;
 
   @override
   void initState() {
@@ -729,14 +732,49 @@ class _ListItemsPageState extends State<ListItemsPage> {
   Future<void> _handleScannedBarcode(String barcode) async {
     final inventoryProvider = Provider.of<InventoryProvider>(context, listen: false);
     final itemNumber = int.tryParse(barcode);
-    double? priceitem = inventoryProvider.getInventoryItemByNumber(itemNumber!);
-    if (itemNumber != null ) {
-      ListedItem listedItem = ListedItem(listId: widget.list.listId, itemNumber: itemNumber, price: priceitem!);
-      await _apiService.addItemToList(listedItem);
-      _fetchListItems();
-      showSlidingBar(context, "Product added to list", isError: false);
+
+    // Log the scanned barcode
+    print("Scanned barcode: $barcode");
+
+    if (itemNumber != null) {
+      // Log the parsed item number
+      print("Parsed item number: $itemNumber");
+
+      double? priceitem = inventoryProvider.getInventoryItemByNumber(itemNumber);
+
+      if (priceitem == null) {
+        // Log if the item number is not found in the inventory provider
+        print("Item number $itemNumber not found in inventory");
+        showSlidingBar(context, 'Product not found', isError: true);
+        return;
+      }
+
+      ListedItem? existingItem;
+      try {
+        existingItem = _listItems.firstWhere((item) => item.itemNumber == itemNumber);
+      } catch (e) {
+        existingItem = null;
+      }
+
+      if (existingItem != null) {
+        // If the item exists, increase the quantity by 1
+        print("Item exists, updating quantity.");
+        existingItem.quantity = (existingItem.quantity ?? 1) + 1;
+        await _apiService.updateListedItem(existingItem);
+        setState(() {});
+        showSlidingBar(context, "Quantity updated for existing product", isError: false);
+      } else {
+        // If the item doesn't exist, create a new ListedItem and add it to the list
+        print("Item does not exist, adding to list.");
+        ListedItem newItem = ListedItem(listId: widget.list.listId, itemNumber: itemNumber, price: priceitem);
+        await _apiService.addItemToList(newItem);
+        await _fetchListItems();
+        showSlidingBar(context, "Product added to list", isError: false);
+      }
     } else {
-      showSlidingBar(context, 'Product not found', isError: true);
+      // Log if the barcode cannot be parsed into an item number
+      print("Invalid barcode, cannot parse into item number: $barcode");
+      showSlidingBar(context, 'Invalid barcode', isError: true);
     }
   }
 
@@ -761,6 +799,37 @@ class _ListItemsPageState extends State<ListItemsPage> {
     });
   }
 
+  Future<void> _startContinuousScan() async {
+    setState(() {
+      _isScanning = true;
+    });
+
+    while (_isScanning) {
+      try {
+        var result = await BarcodeScanner.scan();
+        if (result.type == ResultType.Barcode) {
+          if (result.rawContent.isNotEmpty) {
+            await _handleScannedBarcode(result.rawContent);
+          }
+        } else if (result.type == ResultType.Cancelled) {
+          setState(() {
+            _isScanning = false;
+          });
+        } else if (result.type == ResultType.Error) {
+          print('Error scanning barcode: ${result.rawContent}');
+          setState(() {
+            _isScanning = false;
+          });
+        }
+      } catch (e) {
+        print('Error scanning barcode: $e');
+        setState(() {
+          _isScanning = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bluetoothManager = Provider.of<BluetoothManager>(context, listen: false);
@@ -775,14 +844,20 @@ class _ListItemsPageState extends State<ListItemsPage> {
         backgroundColor: Colors.blueAccent,
         actions: [
           IconButton(
-            onPressed: () async {
-              String? barcode = await BarcodeScannerUtil.scanBarcode();
-              if (barcode != null && barcode.isNotEmpty) {
-                _handleScannedBarcode(barcode);
-              }
+            onPressed: () {
+              _startContinuousScan();
             },
             icon: Icon(Icons.camera_alt_outlined),
           ),
+          if (_isScanning)
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  _isScanning = false;
+                });
+              },
+              icon: Icon(Icons.cancel),
+            ),
         ],
       ),
       body: _isLoading
@@ -818,7 +893,7 @@ class _ListItemsPageState extends State<ListItemsPage> {
                             onPressed: () => _deleteItem(item),
                           ),
                         ],
-                        
+
                       ),
                       onTap: () {
                         Navigator.push(

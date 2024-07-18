@@ -149,12 +149,10 @@ class BluetoothManager extends ChangeNotifier {
   }
 
   Future<void> _handleScannedData(String data) async {
-
     if (_serverAddress == null) {
       _serverAddress = await SharedPreferencesUtil.getServerAddress();
       print("Server error");
-      //_showProductNotFound();
-      //return;
+      return;
     }
     print("You are in the function");
     final apiService = ApiService(baseUrl: _serverAddress!);
@@ -162,20 +160,42 @@ class BluetoothManager extends ChangeNotifier {
       final inventoryProvider = Provider.of<InventoryProvider>(_navigatorKey!.currentContext!, listen: false);
       final itemNumber = int.tryParse(data);
       print("Here is the parsed data $itemNumber");
+
       if (itemNumber != null && inventoryProvider.containsItemNumber(itemNumber)) {
-
         final product = await apiService.getProductByNumber(itemNumber);
-        if (currentPage == "ListsPage" && product!=null){
-          //inventoryProvider.addItemToList(itemNumber);
-          ListedItem listedItem = ListedItem(listId: _currentListid, itemNumber: itemNumber, price: product.retail!);
-          await apiService.addItemToList(listedItem);
+        if (currentPage == "ListsPage" && product != null) {
+          // Fetch the current list items
+          List<ListedItem> currentListItems = await apiService.getAllListedItemsByID(_currentListid);
 
-          ScaffoldMessenger.of(_navigatorKey!.currentContext!).showSnackBar(
-            SnackBar(content: Text('Item added to the list', textAlign: TextAlign.center), backgroundColor: Colors.green, duration: Duration(milliseconds: 150),),
-          );
-          currentPage = "otherThanList";
-        }
-        else {
+          // Check if the item already exists in the list
+          ListedItem? existingItem;
+          try {
+            existingItem = currentListItems.firstWhere((item) => item.itemNumber == itemNumber);
+          } catch (e) {
+            existingItem = null;
+          }
+
+          if (existingItem != null) {
+            // If the item exists, increase the quantity by 1
+            existingItem.quantity = (existingItem.quantity ?? 1) + 1;
+            await apiService.updateListedItem(existingItem);
+            ScaffoldMessenger.of(_navigatorKey!.currentContext!).showSnackBar(
+              SnackBar(content: Text('Quantity updated for existing product', textAlign: TextAlign.center), backgroundColor: Colors.green, duration: Duration(milliseconds: 150)),
+            );
+          } else {
+            // If the item doesn't exist, add it to the list
+            ListedItem listedItem = ListedItem(listId: _currentListid, itemNumber: itemNumber, price: product.retail!);
+            await apiService.addItemToList(listedItem);
+            ScaffoldMessenger.of(_navigatorKey!.currentContext!).showSnackBar(
+              SnackBar(content: Text('Item added to the list', textAlign: TextAlign.center), backgroundColor: Colors.green, duration: Duration(milliseconds: 150)),
+            );
+          }
+
+          // Notify callback
+          if (onItemAddedCallback != null) {
+            onItemAddedCallback!();
+          }
+        } else {
           _navigatorKey!.currentState?.push(
             MaterialPageRoute(
               builder: (context) => ProductDetailsPage(itemNumber: itemNumber),
@@ -190,11 +210,8 @@ class BluetoothManager extends ChangeNotifier {
       print("Error handling scanned data: $e");
       _showProductNotFound();
     }
-
-    if (onItemAddedCallback != null) {
-      onItemAddedCallback!();
-    }
   }
+
 
   void _showProductNotFound() {
     final context = _navigatorKey?.currentContext;

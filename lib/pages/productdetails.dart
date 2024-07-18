@@ -309,6 +309,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                       );
                     },
                   ),
+                  Text(
+
+                    product.longDescription,
+                    style: const TextStyle(fontSize: 16),
+                  ),
                   const SizedBox(height: 16),
                   _buildDetailRow('Item Number:', product.itemNumber.toString()),
                   _buildDetailRow('Supplier:', product.supplier.supplierName),
