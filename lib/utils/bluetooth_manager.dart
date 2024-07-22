@@ -80,6 +80,7 @@ class BluetoothManager extends ChangeNotifier {
     try {
       await device.connect();
       isConnected = true;
+      currentPage = "otherThanLists";
       connectedDevice = device;
       notifyListeners();
 
@@ -163,7 +164,7 @@ class BluetoothManager extends ChangeNotifier {
 
       if (itemNumber != null && inventoryProvider.containsItemNumber(itemNumber)) {
         final product = await apiService.getProductByNumber(itemNumber);
-        if (currentPage == "ListsPage" && product != null) {
+        if (product != null) {
           // Fetch the current list items
           List<ListedItem> currentListItems = await apiService.getAllListedItemsByID(_currentListid);
 
@@ -175,13 +176,14 @@ class BluetoothManager extends ChangeNotifier {
             existingItem = null;
           }
 
-          if (existingItem != null) {
+          if (existingItem != null && currentPage=="ListsPage") {
             // If the item exists, increase the quantity by 1
             existingItem.quantity = (existingItem.quantity ?? 1) + 1;
             await apiService.updateListedItem(existingItem);
             ScaffoldMessenger.of(_navigatorKey!.currentContext!).showSnackBar(
               SnackBar(content: Text('Quantity updated for existing product', textAlign: TextAlign.center), backgroundColor: Colors.green, duration: Duration(milliseconds: 150)),
             );
+            currentPage = "otherthanLists";
           } else {
             // If the item doesn't exist, add it to the list
             ListedItem listedItem = ListedItem(listId: _currentListid, itemNumber: itemNumber, price: product.retail!);
