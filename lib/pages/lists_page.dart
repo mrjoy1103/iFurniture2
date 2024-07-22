@@ -208,6 +208,8 @@ class _ListsPageState extends State<ListsPage> {
     _fetchLists();
   }
 
+
+
   Future<void> _fetchLists() async {
     try {
       List<ItemList> lists = await _apiService.getAllLists();
@@ -612,6 +614,17 @@ class _ListItemsPageState extends State<ListItemsPage> {
 
     final bluetoothManager = Provider.of<BluetoothManager>(context, listen: false);
     bluetoothManager.setOnItemAddedCallback(_fetchListItems);
+    bluetoothManager.setCurrentPage("ListsPage", widget.list.listId);
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    Future.microtask(() {
+      BluetoothManager.instance.resetCurrentPage(); // Reset the current page after the widget is disposed
+      BluetoothManager.instance.notifyListeners(); // Notify listeners about the change
+    });
+    print("ListItemsPage disposed, reset currentPage");
   }
 
   Future<void> _fetchListItems() async {
