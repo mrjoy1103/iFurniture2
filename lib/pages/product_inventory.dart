@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/inventory.dart';
+import '../models/inventory_images.dart';
 import '../providers/inventory_provider.dart';
 import '../models/filter_criteria.dart';
 import '../utils/filterdialog.dart';
+import '../utils/sharedprefutils.dart';
 import 'productdetails.dart';
+import '../services/api_services.dart';
 
 class ProductInventoryPage extends StatefulWidget {
   final String serverAddress;
@@ -65,7 +70,6 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
       );
     });
     _inventoryProvider.updateFilterCriteria(_currentCriteria);
-    
   }
 
   Future<void> _openFilterDialog() async {
@@ -161,17 +165,22 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
     Navigator.of(context).pop();
   }
 
+  Future<List<ItemImage>> _fetchImagesForItem(int itemNumber) async {
+    String? serverAddress = await SharedPreferencesUtil.getServerAddress();
+    if (serverAddress == null) {
+      throw Exception('Server address not found in SharedPreferences');
+    }
+    ApiService apiService = ApiService(baseUrl: serverAddress);
+    return await apiService.getImagesByItemNumber(itemNumber);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenHeight = mediaQuery.size.height;
-    final screenWidth = mediaQuery.size.width;
-
     return ChangeNotifierProvider<InventoryProvider>.value(
       value: _inventoryProvider,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(''),
+          title: const Text('Product Inventory'),
           backgroundColor: Colors.white70,
           actions: [
             IconButton(
@@ -214,7 +223,13 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
                     return const Center(child: CircularProgressIndicator());
                   }
 
-                  return ListView.builder(
+                  return GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.75,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
                     itemCount: inventoryProvider.inventory.length + (inventoryProvider.isLoading ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index == inventoryProvider.inventory.length) {
@@ -222,47 +237,73 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
                       }
 
                       final item = inventoryProvider.inventory[index];
-                      bool inStock = item.branchInventory.any((branch) => branch.inStock > 0);
-                      bool available = item.branchInventory.any((branch) => branch.available > 0);
-                      bool onOrder = item.branchInventory.any((branch) => branch.onOrder > 0);
 
-                      return InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProductDetailsPage(
-                                itemNumber: item.itemNumber,
+                      return FutureBuilder<List<ItemImage>>(
+                        future: _fetchImagesForItem(item.itemNumber),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            print('Snapshot error: ${snapshot.error}');
+                            return Center(child: Text('Error: ${snapshot.error}'));
+                          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const Center(child: Text('No images available'));
+                          }
+
+                          final image = snapshot.data!.first;
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProductDetailsPage(
+                                    itemNumber: item.itemNumber,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(
+                                    child: Image.memory(
+                                      base64Decode(image.imageBase64),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          item.description,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Text(
+                                          '\$${item.retail?.toStringAsFixed(2) ?? 'N/A'}',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.green,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           );
                         },
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Flexible(flex: 1, child: Text(item.itemNumber.toString())),
-                                Flexible(flex: 2, child: Text(item.description)),
-                                Flexible(
-                                  flex: 1,
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.circle, color: inStock ? Colors.blue : Colors.grey),
-                                      Icon(Icons.circle, color: available ? Colors.green : Colors.grey),
-                                      Icon(Icons.circle, color: onOrder ? Colors.red : Colors.grey),
-                                    ],
-                                  ),
-                                ),
-                                Flexible(flex: 1, child: Text('\$${item.retail?.toStringAsFixed(2) ?? 'N/A'}')),
-                              ],
-                            ),
-                          ),
-                        ),
                       );
                     },
                   );
