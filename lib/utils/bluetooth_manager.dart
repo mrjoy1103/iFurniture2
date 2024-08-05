@@ -248,4 +248,4 @@ class BluetoothManager extends ChangeNotifier {
   void setOnItemAddedCallback(void Function() callback) {
     onItemAddedCallback = callback;
   }
-} 
+}
