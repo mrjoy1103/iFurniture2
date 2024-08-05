@@ -187,9 +187,9 @@ class BluetoothManager extends ChangeNotifier {
             ListedItem? existingItem;
             // Check if the item already exists in the list
             try {
-            existingItem = currentListItems.firstWhere(
-                  (item) => item.itemNumber == itemNumber
-            );}
+              existingItem = currentListItems.firstWhere(
+                      (item) => item.itemNumber == itemNumber
+              );}
             catch (e){
               existingItem = null;
             }
@@ -248,4 +248,4 @@ class BluetoothManager extends ChangeNotifier {
   void setOnItemAddedCallback(void Function() callback) {
     onItemAddedCallback = callback;
   }
-}
+} 

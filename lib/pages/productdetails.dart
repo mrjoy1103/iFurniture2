@@ -16,6 +16,7 @@ import 'package:fw_demo/utils/collectionitemswidget.dart';
 import 'package:fw_demo/utils/branchInventorygrid.dart';
 import '../utils/slidingbar.dart';
 import 'barcodecamerascan.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final int itemNumber;
@@ -31,6 +32,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   late Future<List<ItemImage>> _futureImages;
   late Future<List<BranchInventory>> _futureBranchInventory;
   final PageController _pageController = PageController();
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   void initState() {
@@ -95,6 +97,73 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     }
   }
 
+  Future<void> _pickImageAndUpload(ImageSource source) async {
+    final XFile? image = await _imagePicker.pickImage(source: source);
+    if (image != null) {
+      final bytes = await image.readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      try {
+        // Determine the next file name
+        List<ItemImage> existingImages = await _fetchProductImages(widget.itemNumber);
+        int imageCount = existingImages.length;
+        String fileName = imageCount == 0
+            ? '${widget.itemNumber}'
+            : '${widget.itemNumber}_$imageCount';
+
+        // Create ItemImage object
+        ItemImage itemImage = ItemImage(
+          fileName: fileName,
+          imageBase64: base64Image,
+        );
+
+        // Upload the image
+        String? serverAddress = await SharedPreferencesUtil.getServerAddress();
+        ApiService apiService = ApiService(baseUrl: serverAddress!);
+        await apiService.addItemImage(itemImage, widget.itemNumber);
+
+        // Refresh the images list
+        setState(() {
+          _futureImages = _fetchProductImages(widget.itemNumber);
+        });
+
+        showSlidingBar(context, 'Image added successfully');
+      } catch (e) {
+        showSlidingBar(context, 'Error adding image: $e', isError: true);
+      }
+    } else {
+      print('No image selected.');
+    }
+  }
+
+  void _showImageSourceActionSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: <Widget>[
+            ListTile(
+              leading: Icon(Icons.photo_library),
+              title: Text('Photo Library'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickImageAndUpload(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.photo_camera),
+              title: Text('Camera'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickImageAndUpload(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _onStatusCircleTap(String label, String modelNumber) {
     showDialog(
       context: context,
@@ -134,7 +203,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             ),
           ),
           SizedBox(height: 5),
-          Text(label),
+          //Text(label),
         ],
       ),
     );
@@ -261,7 +330,23 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                         print('Snapshot error: ${snapshot.error}');
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(child: Text('No images available'));
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('No images available'),
+                              const SizedBox(height: 16),
+                              ElevatedButton.icon(
+                                onPressed: _showImageSourceActionSheet,
+                                icon: Icon(Icons.add_a_photo),
+                                label: Text('Upload Image'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       }
 
                       List<ItemImage> images = snapshot.data!;
@@ -310,7 +395,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     },
                   ),
                   Text(
-
                     product.longDescription,
                     style: const TextStyle(fontSize: 16),
                   ),

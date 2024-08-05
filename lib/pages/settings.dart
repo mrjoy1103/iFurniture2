@@ -140,7 +140,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => LoginPage()),
-        (Route<dynamic> route) => false,
+          (Route<dynamic> route) => false,
     );
   }
 
