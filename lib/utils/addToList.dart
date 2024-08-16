@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/listedItem.dart';
 import '../models/list.dart';
 import '../services/api_services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fw_demo/utils/sharedprefutils.dart';
 
 class AddToListDialog extends StatefulWidget {
@@ -11,11 +10,11 @@ class AddToListDialog extends StatefulWidget {
   final String serverAddress;
 
   const AddToListDialog({
-    Key? key,
+    super.key,
     required this.itemNumber,
     required this.price,
     required this.serverAddress,
-  }) : super(key: key);
+  });
 
   @override
   _AddToListDialogState createState() => _AddToListDialogState();
@@ -122,9 +121,9 @@ class _AddToListDialogState extends State<AddToListDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Add to List'),
+      title: const Text('Add to List'),
       content: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -132,7 +131,7 @@ class _AddToListDialogState extends State<AddToListDialog> {
             if (!_isCreatingNewList)
               DropdownButton<String>(
                 value: _selectedListId,
-                hint: Text('Select List'),
+                hint: const Text('Select List'),
                 onChanged: (value) {
                   setState(() {
                     _selectedListId = value;
@@ -148,15 +147,15 @@ class _AddToListDialogState extends State<AddToListDialog> {
             if (_isCreatingNewList)
               TextField(
                 controller: _newListNameController,
-                decoration: InputDecoration(hintText: 'New List Name'),
+                decoration: const InputDecoration(hintText: 'New List Name'),
               ),
             TextField(
               controller: _quantityController,
-              decoration: InputDecoration(hintText: 'Quantity'),
+              decoration: const InputDecoration(hintText: 'Quantity'),
               keyboardType: TextInputType.number,
             ),
             SwitchListTile(
-              title: Text('Create New List'),
+              title: const Text('Create New List'),
               value: _isCreatingNewList,
               onChanged: (value) {
                 setState(() {
@@ -170,11 +169,11 @@ class _AddToListDialogState extends State<AddToListDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
         TextButton(
           onPressed: _addItemToList,
-          child: Text('Add'),
+          child: const Text('Add'),
         ),
       ],
     );

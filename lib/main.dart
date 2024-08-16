@@ -6,17 +6,18 @@ import 'package:fw_demo/providers/inventory_provider.dart';
 import 'package:fw_demo/utils/routes.dart';
 import 'package:fw_demo/pages/serverConnect.dart';
 import 'package:fw_demo/pages/login.dart';
-import 'package:fw_demo/pages/loginSucces.dart';
 import 'package:fw_demo/pages/product_inventory.dart';
 import 'models/filter_criteria.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     FilterCriteria initialCriteria = FilterCriteria(
@@ -46,16 +47,16 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: MyRoutes.ipRoute,
         routes: {
-          MyRoutes.ipRoute: (context) => ServerAddressPage(),
-          MyRoutes.loginRoute: (context) => LoginPage(),
-          MyRoutes.menupageRoute: (context) => MenuPage()
+          MyRoutes.ipRoute: (context) => const ServerAddressPage(),
+          MyRoutes.loginRoute: (context) => const LoginPage(),
+          MyRoutes.menupageRoute: (context) => const MenuPage()
         },
         onGenerateRoute: (settings) {
           if (settings.name == MyRoutes.loginRoute) {
             final args = settings.arguments as Map<String, String>;
             return MaterialPageRoute(
               builder: (context) {
-                return LoginPage();
+                return const LoginPage();
               },
             );
           }

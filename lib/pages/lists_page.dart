@@ -172,16 +172,13 @@ import 'package:barcode_scan2/platform_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:fw_demo/models/cipherInventory.dart';
-import 'package:fw_demo/models/inventory.dart';
 import 'package:fw_demo/models/selectedItemlist.dart';
 import 'package:fw_demo/utils/bluetooth_manager.dart';
 import 'package:provider/provider.dart';
-import '../models/Inventory.dart';
 import '../models/listedItem.dart';
 import '../providers/inventory_provider.dart';
 import '../services/api_services.dart';
 import '../models/list.dart';
-import '../utils/cam_scan_utility.dart';
 import '../utils/reconcilation_util.dart';
 import '../utils/sharedprefutils.dart';
 import '../utils/slidingbar.dart';
@@ -190,7 +187,7 @@ import 'productdetails.dart';
 class ListsPage extends StatefulWidget {
   final String serverAddress;
 
-  const ListsPage({Key? key, required this.serverAddress}) : super(key: key);
+  const ListsPage({super.key, required this.serverAddress});
 
   @override
   _ListsPageState createState() => _ListsPageState();
@@ -265,7 +262,7 @@ class _ListsPageState extends State<ListsPage> {
   }
 
   void _showCreateListDialog() {
-    final TextEditingController _listNameController = TextEditingController();
+    final TextEditingController listNameController = TextEditingController();
 
     showDialog(
       context: context,
@@ -274,9 +271,9 @@ class _ListsPageState extends State<ListsPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
           ),
-          title: Text('Create New List', style: TextStyle(color: Colors.blueAccent)),
+          title: const Text('Create New List', style: TextStyle(color: Colors.blueAccent)),
           content: TextField(
-            controller: _listNameController,
+            controller: listNameController,
             decoration: InputDecoration(
               hintText: 'List Name',
               border: OutlineInputBorder(
@@ -287,20 +284,20 @@ class _ListsPageState extends State<ListsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel', style: TextStyle(color: Colors.redAccent)),
+              child: const Text('Cancel', style: TextStyle(color: Colors.redAccent)),
             ),
             ElevatedButton(
               onPressed: () {
-                _createList(_listNameController.text);
+                _createList(listNameController.text);
                 Navigator.pop(context);
               },
-              child: Text('Create'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueAccent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
               ),
+              child: const Text('Create'),
             ),
           ],
         );
@@ -324,11 +321,11 @@ class _ListsPageState extends State<ListsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Lists', style: TextStyle(color: Colors.white)),
+        title: const Text('My Lists', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blueAccent,
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView.builder(
@@ -341,11 +338,11 @@ class _ListsPageState extends State<ListsPage> {
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: ListTile(
-                title: Text(list.listName, style: TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(list.listName, style: const TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text('Created by ${list.userName} on ${list.dateCreated}'),
                 onTap: () => _showListItems(list),
                 trailing: IconButton(
-                  icon: Icon(Icons.delete, color: Colors.redAccent),
+                  icon: const Icon(Icons.delete, color: Colors.redAccent),
                   onPressed: () {
                     _clearList(list.listId);
                   },
@@ -357,8 +354,8 @@ class _ListsPageState extends State<ListsPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreateListDialog,
-        child: Icon(Icons.add),
         backgroundColor: Colors.blueAccent,
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -594,7 +591,7 @@ class ListItemsPage extends StatefulWidget {
   final String serverAddress;
   final ItemList list;
 
-  const ListItemsPage({Key? key, required this.serverAddress, required this.list}) : super(key: key);
+  const ListItemsPage({super.key, required this.serverAddress, required this.list});
 
   @override
   _ListItemsPageState createState() => _ListItemsPageState();
@@ -680,7 +677,7 @@ class _ListItemsPageState extends State<ListItemsPage> {
 
       await _apiService.addCipher(cipherItems);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Items reconciled successfully')),
+        const SnackBar(content: Text('Items reconciled successfully')),
       );
 
       await _apiService.clearList(listId);
@@ -689,13 +686,13 @@ class _ListItemsPageState extends State<ListItemsPage> {
     } catch (e) {
       print('Error reconciling items: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error reconciling items')),
+        const SnackBar(content: Text('Error reconciling items')),
       );
     }
   }
 
   void _showEditQuantityDialog(ListedItem item) {
-    final TextEditingController _quantityController = TextEditingController(text: item.quantity?.toString());
+    final TextEditingController quantityController = TextEditingController(text: item.quantity?.toString());
 
     showDialog(
       context: context,
@@ -704,9 +701,9 @@ class _ListItemsPageState extends State<ListItemsPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
           ),
-          title: Text('Edit Quantity', style: TextStyle(color: Colors.blueAccent)),
+          title: const Text('Edit Quantity', style: TextStyle(color: Colors.blueAccent)),
           content: TextField(
-            controller: _quantityController,
+            controller: quantityController,
             decoration: InputDecoration(
               hintText: 'Quantity',
               border: OutlineInputBorder(
@@ -718,23 +715,23 @@ class _ListItemsPageState extends State<ListItemsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel', style: TextStyle(color: Colors.redAccent)),
+              child: const Text('Cancel', style: TextStyle(color: Colors.redAccent)),
             ),
             ElevatedButton(
               onPressed: () {
-                int? newQuantity = int.tryParse(_quantityController.text);
+                int? newQuantity = int.tryParse(quantityController.text);
                 if (newQuantity != null) {
                   _updateItemQuantity(item, newQuantity);
                 }
                 Navigator.pop(context);
               },
-              child: Text('Update'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueAccent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
               ),
+              child: const Text('Update'),
             ),
           ],
         );
@@ -805,9 +802,9 @@ class _ListItemsPageState extends State<ListItemsPage> {
       ),
     );
 
-    overlay?.insert(overlayEntry);
+    overlay.insert(overlayEntry);
 
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () {
       overlayEntry.remove();
     });
   }
@@ -853,14 +850,14 @@ class _ListItemsPageState extends State<ListItemsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Items in ${widget.list.listName}', style: TextStyle(color: Colors.white)),
+        title: Text('Items in ${widget.list.listName}', style: const TextStyle(color: Colors.white)),
         backgroundColor: Colors.blueAccent,
         actions: [
           IconButton(
             onPressed: () {
               _startContinuousScan();
             },
-            icon: Icon(Icons.camera_alt_outlined),
+            icon: const Icon(Icons.camera_alt_outlined),
           ),
           if (_isScanning)
             IconButton(
@@ -869,12 +866,12 @@ class _ListItemsPageState extends State<ListItemsPage> {
                   _isScanning = false;
                 });
               },
-              icon: Icon(Icons.cancel),
+              icon: const Icon(Icons.cancel),
             ),
         ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -890,19 +887,19 @@ class _ListItemsPageState extends State<ListItemsPage> {
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     child: ListTile(
-                      title: Text('Item ${item.itemNumber}', style: TextStyle(fontWeight: FontWeight.bold)),
+                      title: Text('Item ${item.itemNumber}', style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Text('Quantity: ${item.quantity ?? 1}'),
                           IconButton(
-                            icon: Icon(Icons.edit, color: Colors.orangeAccent),
+                            icon: const Icon(Icons.edit, color: Colors.orangeAccent),
                             onPressed: () => _showEditQuantityDialog(item),
                           ),
 
                         Text('Price: \$ ${item.price}',textAlign: TextAlign.left,),
                           IconButton(
-                            icon: Icon(Icons.delete, color: Colors.redAccent),
+                            icon: const Icon(Icons.delete, color: Colors.redAccent),
                             onPressed: () => _deleteItem(item),
                           ),
                         ],
@@ -923,13 +920,13 @@ class _ListItemsPageState extends State<ListItemsPage> {
             ),
             ElevatedButton(
               onPressed: () => _reconcileItems(widget.list.listId),
-              child: Text('Reconcile'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
               ),
+              child: const Text('Reconcile'),
             ),
           ],
         ),

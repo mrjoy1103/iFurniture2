@@ -99,7 +99,7 @@ class Inventory {
       );
     } catch (e) {
       print('Error parsing Inventory: $e');
-      throw e;
+      rethrow;
     }
   }
 

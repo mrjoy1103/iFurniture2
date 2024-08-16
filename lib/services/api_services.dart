@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:fw_demo/utils/sharedprefutils.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
-import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/branch_inventory.dart';
 import '../models/cipherInventory.dart';
@@ -35,7 +33,7 @@ class ApiService {
             await _loadDeviceName();
             final response = await http.get(
                 Uri.parse('$baseUrl/Inventory/ErrorResponse'),
-            ).timeout(Duration(seconds: 20));
+            ).timeout(const Duration(seconds: 20));
 
             if (response.statusCode >= 200 && response.statusCode < 300) {
                 print("Response Data: ${response.body}");
@@ -140,7 +138,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error fetching filtered inventory: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -170,7 +168,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error fetching collections: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -200,7 +198,7 @@ class ApiService {
             }
         } catch (e) {
             print('error fetching suppliers : $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -230,7 +228,7 @@ class ApiService {
             }
         } catch (e) {
             print('error fetching the styles , exception is thrown ');
-            throw e;
+            rethrow;
         }
     }
 
@@ -260,7 +258,7 @@ class ApiService {
             }
         } catch (e) {
             print('error fetching the categories, exception is thrown ');
-            throw e;
+            rethrow;
         }
     }
 
@@ -282,7 +280,7 @@ class ApiService {
 
             if (response.statusCode == 200) {
                 final responseBody = jsonDecode(response.body);
-                print('Response body (full): ${responseBody}');
+                print('Response body (full): $responseBody');
                 if (responseBody['Result'] == 0) {
                     return Inventory.fromJson(responseBody['Data']);
                 } else {
@@ -293,7 +291,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error fetching product details: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -328,7 +326,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error fetching images: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -357,7 +355,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error adding image to item: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -398,7 +396,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error fetching branch inventory: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -429,7 +427,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error fetching lists: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -459,7 +457,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error creating list: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -482,7 +480,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error adding item to list: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -512,7 +510,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error clearing list: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -535,7 +533,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error clearing listed items: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -558,7 +556,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error clearing listed item: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -581,7 +579,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error clearing selected items: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -604,7 +602,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error updating listed item: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -636,7 +634,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error adding cipher items: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -667,7 +665,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error fetching listed items: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -698,7 +696,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error fetching listed items by ID: $e');
-            throw e;
+            rethrow;
         }
     }
 
@@ -728,7 +726,7 @@ class ApiService {
             }
         } catch (e) {
             print('Error fetching listed item: $e');
-            throw e;
+            rethrow;
         }
     }
 

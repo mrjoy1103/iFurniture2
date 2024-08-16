@@ -107,19 +107,19 @@ class _SettingsPageState extends State<SettingsPage> {
 import 'package:flutter/material.dart';
 import 'package:fw_demo/pages/login.dart';
 import 'package:fw_demo/utils/bluetooth_manager.dart';
-import 'package:fw_demo/utils/sharedprefutils.dart';
 import 'package:provider/provider.dart';
-import '../providers/inventory_provider.dart';
 
 class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  String _appVersion = '1.0.0';
-  String _companyName = 'New Vision Information Systems';
-  String _apiServerVersion = '2.2.3'; // Example value, you might want to fetch this from the server
+  final String _appVersion = '1.0.0';
+  final String _companyName = 'New Vision Information Systems';
+  final String _apiServerVersion = '2.2.3'; // Example value, you might want to fetch this from the server
 
   @override
   void initState() {
@@ -139,7 +139,7 @@ class _SettingsPageState extends State<SettingsPage> {
       bluetoothManager.disconnect();
     }
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => const LoginPage()),
           (Route<dynamic> route) => false,
     );
   }
@@ -150,7 +150,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings', style: TextStyle(color: Colors.white)),
+        title: const Text('Settings', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blueAccent,
         automaticallyImplyLeading: true,
       ),
@@ -164,54 +164,54 @@ class _SettingsPageState extends State<SettingsPage> {
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: ListTile(
-                title: Text('App Version', style: TextStyle(fontWeight: FontWeight.bold)),
+                title: const Text('App Version', style: TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text(_appVersion),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Card(
               elevation: 5,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: ListTile(
-                title: Text('Build By', style: TextStyle(fontWeight: FontWeight.bold)),
+                title: const Text('Build By', style: TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text(_companyName),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Card(
               elevation: 5,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: ListTile(
-                title: Text('API Server Version', style: TextStyle(fontWeight: FontWeight.bold)),
+                title: const Text('API Server Version', style: TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text(_apiServerVersion),
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Card(
               elevation: 5,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: ListTile(
-                title: Text('Barcode Scanner', style: TextStyle(fontWeight: FontWeight.bold)),
+                title: const Text('Barcode Scanner', style: TextStyle(fontWeight: FontWeight.bold)),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ElevatedButton(
-                      onPressed: _startScanning, // Start Bluetooth scanning
-                      child: Text('Connect'),
+                      onPressed: _startScanning,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
-                      ),
+                      ), // Start Bluetooth scanning
+                      child: const Text('Connect'),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Consumer<BluetoothManager>(
                       builder: (context, bluetoothManager, child) {
                         return Visibility(
@@ -220,13 +220,13 @@ class _SettingsPageState extends State<SettingsPage> {
                             onPressed: () {
                               bluetoothManager.disconnect(); // Disconnect Bluetooth
                             },
-                            child: Text('Disconnect'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.redAccent,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                               ),
                             ),
+                            child: const Text('Disconnect'),
                           ),
                         );
                       },
@@ -235,16 +235,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => logout(context), // Logout and disconnect Bluetooth if needed
-              child: Text('Logout'),
+              onPressed: () => logout(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
-              ),
+              ), // Logout and disconnect Bluetooth if needed
+              child: const Text('Logout'),
             ),
           ],
         ),

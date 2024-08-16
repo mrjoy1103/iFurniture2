@@ -5,7 +5,7 @@ class MultiSelectDialog extends StatefulWidget {
   final List<String> items;
   final List<String> initialSelectedItems;
 
-  MultiSelectDialog({
+  const MultiSelectDialog({super.key, 
     required this.title,
     required this.items,
     required this.initialSelectedItems,
@@ -34,7 +34,7 @@ class _MultiSelectDialogState extends State<MultiSelectDialog> {
             final isSelected = _selectedItems.contains(item);
             return ListTile(
               title: Text(item),
-              trailing: isSelected ? Icon(Icons.check) : null,
+              trailing: isSelected ? const Icon(Icons.check) : null,
               onTap: () {
                 setState(() {
                   if (isSelected) {

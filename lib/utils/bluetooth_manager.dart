@@ -28,8 +28,8 @@ class BluetoothManager extends ChangeNotifier {
   final Guid characteristicUUID = Guid("720330f4-1db7-4fd7-ae5a-87e5bd942880");
 
   List<ScanResult> _scanResults = [];
-  Map<BluetoothDevice, List<BluetoothService>> _deviceServices = {};
-  Map<Guid, StreamSubscription<List<int>>> _characteristicSubscriptions = {};
+  final Map<BluetoothDevice, List<BluetoothService>> _deviceServices = {};
+  final Map<Guid, StreamSubscription<List<int>>> _characteristicSubscriptions = {};
 
   String currentPage = "otherThanLists";
   int _currentListid = -1;
@@ -73,7 +73,7 @@ class BluetoothManager extends ChangeNotifier {
       notifyListeners();
     });
 
-    FlutterBluePlus.startScan(timeout: Duration(seconds: 10)).then((_) {
+    FlutterBluePlus.startScan(timeout: const Duration(seconds: 10)).then((_) {
       print("Scan started");
       isScanning = false;
       notifyListeners();
@@ -118,22 +118,18 @@ class BluetoothManager extends ChangeNotifier {
         //orElse: () => null,
       );
 
-      if (targetService != null) {
-        for (BluetoothCharacteristic characteristic in targetService.characteristics) {
-          if (characteristic.uuid == characteristicUUID && characteristic.properties.notify) {
-            await characteristic.setNotifyValue(true);
-            if (_characteristicSubscriptions.containsKey(characteristic.uuid)) {
-              _characteristicSubscriptions[characteristic.uuid]!.cancel();
-            }
-            _characteristicSubscriptions[characteristic.uuid] = characteristic.value.listen((value) async {
-              await _handleData(value);
-            });
+      for (BluetoothCharacteristic characteristic in targetService.characteristics) {
+        if (characteristic.uuid == characteristicUUID && characteristic.properties.notify) {
+          await characteristic.setNotifyValue(true);
+          if (_characteristicSubscriptions.containsKey(characteristic.uuid)) {
+            _characteristicSubscriptions[characteristic.uuid]!.cancel();
           }
+          _characteristicSubscriptions[characteristic.uuid] = characteristic.value.listen((value) async {
+            await _handleData(value);
+          });
         }
-      } else {
-        print("Target service not found");
       }
-    } catch (error) {
+        } catch (error) {
       print("Error discovering services: $error");
     }
   }
@@ -155,7 +151,7 @@ class BluetoothManager extends ChangeNotifier {
 
   Future<void> _handleData(List<int> value) async {
     String scannedData = String.fromCharCodes(value);
-    print("Received data from characteristic: ${value}");
+    print("Received data from characteristic: $value");
     print("Scanned data: $scannedData");
 
     await _handleScannedData(scannedData);
@@ -178,55 +174,51 @@ class BluetoothManager extends ChangeNotifier {
 
       if (itemNumber != null && inventoryProvider.containsItemNumber(itemNumber)) {
         final product = await apiService.getProductByNumber(itemNumber);
-        if (product != null) {
-          if (currentPage == "ListsPage") {
-            print("Handling ListsPage functionality");
-            // Fetch the current list items
-            List<ListedItem> currentListItems = await apiService.getAllListedItemsByID(_currentListid);
+        if (currentPage == "ListsPage") {
+          print("Handling ListsPage functionality");
+          // Fetch the current list items
+          List<ListedItem> currentListItems = await apiService.getAllListedItemsByID(_currentListid);
 
-            ListedItem? existingItem;
-            // Check if the item already exists in the list
-            try {
-              existingItem = currentListItems.firstWhere(
-                      (item) => item.itemNumber == itemNumber
-              );}
-            catch (e){
-              existingItem = null;
-            }
+          ListedItem? existingItem;
+          // Check if the item already exists in the list
+          try {
+            existingItem = currentListItems.firstWhere(
+                    (item) => item.itemNumber == itemNumber
+            );}
+          catch (e){
+            existingItem = null;
+          }
 
-            if (existingItem != null) {
-              // If the item exists, increase the quantity by 1
-              existingItem.quantity = (existingItem.quantity ?? 1) + 1;
-              await apiService.updateListedItem(existingItem);
-              ScaffoldMessenger.of(_navigatorKey!.currentContext!).showSnackBar(
-                SnackBar(content: Text('Quantity updated for existing product', textAlign: TextAlign.center), backgroundColor: Colors.green, duration: Duration(milliseconds: 150)),
-              );
-            } else {
-              // If the item doesn't exist, add it to the list
-              ListedItem listedItem = ListedItem(listId: _currentListid, itemNumber: itemNumber, price: product.retail!);
-              await apiService.addItemToList(listedItem);
-              ScaffoldMessenger.of(_navigatorKey!.currentContext!).showSnackBar(
-                SnackBar(content: Text('Item added to the list', textAlign: TextAlign.center), backgroundColor: Colors.green, duration: Duration(milliseconds: 150)),
-              );
-            }
-
-            // Notify callback
-            if (onItemAddedCallback != null) {
-              onItemAddedCallback!();
-            }
+          if (existingItem != null) {
+            // If the item exists, increase the quantity by 1
+            existingItem.quantity = (existingItem.quantity ?? 1) + 1;
+            await apiService.updateListedItem(existingItem);
+            ScaffoldMessenger.of(_navigatorKey!.currentContext!).showSnackBar(
+              const SnackBar(content: Text('Quantity updated for existing product', textAlign: TextAlign.center), backgroundColor: Colors.green, duration: Duration(milliseconds: 150)),
+            );
           } else {
-            print("Handling non-ListsPage functionality");
-            // Navigate to ProductDetailsPage if not on ListsPage
-            _navigatorKey!.currentState?.push(
-              MaterialPageRoute(
-                builder: (context) => ProductDetailsPage(itemNumber: itemNumber),
-              ),
+            // If the item doesn't exist, add it to the list
+            ListedItem listedItem = ListedItem(listId: _currentListid, itemNumber: itemNumber, price: product.retail!);
+            await apiService.addItemToList(listedItem);
+            ScaffoldMessenger.of(_navigatorKey!.currentContext!).showSnackBar(
+              const SnackBar(content: Text('Item added to the list', textAlign: TextAlign.center), backgroundColor: Colors.green, duration: Duration(milliseconds: 150)),
             );
           }
+
+          // Notify callback
+          if (onItemAddedCallback != null) {
+            onItemAddedCallback!();
+          }
         } else {
-          _showProductNotFound();
+          print("Handling non-ListsPage functionality");
+          // Navigate to ProductDetailsPage if not on ListsPage
+          _navigatorKey!.currentState?.push(
+            MaterialPageRoute(
+              builder: (context) => ProductDetailsPage(itemNumber: itemNumber),
+            ),
+          );
         }
-      } else {
+            } else {
         print("you are in second if else");
         _showProductNotFound();
       }
@@ -240,7 +232,7 @@ class BluetoothManager extends ChangeNotifier {
     final context = _navigatorKey?.currentContext;
     if (context != null && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Product not found', textAlign: TextAlign.center,), backgroundColor: Colors.redAccent, duration: Duration(milliseconds: 150)),
+        const SnackBar(content: Text('Product not found', textAlign: TextAlign.center,), backgroundColor: Colors.redAccent, duration: Duration(milliseconds: 150)),
       );
     }
   }

@@ -6,10 +6,10 @@ class BranchInventoryGrid extends StatelessWidget {
   final int itemNumber; // Change to itemNumber
 
   const BranchInventoryGrid({
-    Key? key,
+    super.key,
     required this.branchInventory,
     required this.itemNumber, // Change to itemNumber
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class BranchInventoryGrid extends StatelessWidget {
     List<String> supplierBranchNames = supplierInventory.map((branch) => branch.branchName).toList();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Branch Inventory Details'),
+        title: const Text('Branch Inventory Details'),
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -39,12 +39,12 @@ class BranchInventoryGrid extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Branch Inventory',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 DataTable(
-                  columns: [
+                  columns: const [
                     DataColumn(label: Text('Location')),
                     DataColumn(label: Text('In Stock')),
                     DataColumn(label: Text('Available')),
@@ -60,8 +60,8 @@ class BranchInventoryGrid extends StatelessWidget {
                   }).toList(),
                 ),
                 if (supplierInventory.isNotEmpty) ...[
-                  SizedBox(height: 20),
-                  Text(
+                  const SizedBox(height: 20),
+                  const Text(
                     'Ashley Inventory',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
@@ -69,9 +69,9 @@ class BranchInventoryGrid extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     child: DataTable(
                       columns: [
-                        DataColumn(label: Text('Model')),
+                        const DataColumn(label: Text('Model')),
                         //DataColumn(label: Text('$itemNumber')),
-                        ...supplierBranchNames.map((branchName) => DataColumn(label: Text(branchName))).toList(),
+                        ...supplierBranchNames.map((branchName) => DataColumn(label: Text(branchName))),
                       ],
                       rows: [
                         DataRow(cells: [
@@ -80,7 +80,7 @@ class BranchInventoryGrid extends StatelessWidget {
                           ...supplierBranchNames.map((branchName) {
                             BranchInventory? branch = supplierInventory.firstWhere((b) => b.branchName == branchName);
                             return DataCell(Text(branch.inStock.toInt().toString()));
-                          }).toList(),
+                          }),
                         ]),
                       ],
                     ),

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fw_demo/services/api_services.dart';
 import 'package:fw_demo/pages/loginSucces.dart';
-import '../models/user.dart';
 import '../utils/sharedprefutils.dart'; // Ensure the correct import path
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -88,45 +89,45 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sign In'),
+        title: const Text('Sign In'),
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: ConstrainedBox(
-            constraints: BoxConstraints(
+            constraints: const BoxConstraints(
               maxWidth: 600,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset('assets/fw_logo.png', height: screenHeight * 0.2), // Ensure the image exists in assets
-                SizedBox(height: 20),
-                Text(
+                const SizedBox(height: 20),
+                const Text(
                   'Hey, you are back :)',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 if (_errorMessage != null) ...[
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Text(
                     _errorMessage!,
-                    style: TextStyle(color: Colors.red, fontSize: 16),
+                    style: const TextStyle(color: Colors.red, fontSize: 16),
                     textAlign: TextAlign.center,
                   ),
                 ],
                 if (_isLoading) ...[
-                  SizedBox(height: 20),
-                  CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  const CircularProgressIndicator(),
                 ],
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Form(
                   key: _formKey,
                   child: Column(
                     children: [
                       TextFormField(
                         controller: _usernameController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Username',
                           hintText: 'your_username',
                           border: OutlineInputBorder(),
@@ -138,10 +139,10 @@ class _LoginPageState extends State<LoginPage> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       TextFormField(
                         controller: _passwordController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Password',
                           hintText: 'abcd1234',
                           border: OutlineInputBorder(),
@@ -154,39 +155,39 @@ class _LoginPageState extends State<LoginPage> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _login,
-                          child: Text(
-                            'Sign in with username',
-                            style: TextStyle(color: Colors.white),
-                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue[900],
-                            padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                          ),
+                          child: const Text(
+                            'Sign in with username',
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
-                Text(
+                const SizedBox(height: 20),
+                const Text(
                   'Ready to chair-ish another great day of sales?',
                   style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextButton(
                   onPressed: () {
                     // Handle forgot password
                   },
-                  child: Text('Forget Your Password? Contact Your Admin'),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.blue[900],
                   ),
+                  child: const Text('Forget Your Password? Contact Your Admin'),
                 ),
               ],
             ),
