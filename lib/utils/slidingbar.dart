@@ -5,7 +5,7 @@ class SlidingBar extends StatefulWidget {
   final String message;
   final bool isError;
 
-  const SlidingBar({super.key, required this.message, this.isError = false});
+  const SlidingBar({required this.message, this.isError = false});
 
   @override
   _SlidingBarState createState() => _SlidingBarState();

@@ -5,10 +5,10 @@ class CollectionDropdown extends StatefulWidget {
   final ValueChanged<List<String>> onSelectionChanged;
 
   const CollectionDropdown({
-    super.key,
+    Key? key,
     required this.selectedItems,
     required this.onSelectionChanged,
-  });
+  }) : super(key: key);
 
   @override
   _CollectionDropdownState createState() => _CollectionDropdownState();
@@ -29,7 +29,7 @@ class _CollectionDropdownState extends State<CollectionDropdown> {
 
   Future<List<String>> _loadCollections() async {
     // Simulate network delay
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(Duration(seconds: 2));
     // Replace with actual data fetching logic
     final collections = await fetchCollections(); // Your API call or data provider method
     setState(() {
@@ -60,18 +60,18 @@ class _CollectionDropdownState extends State<CollectionDropdown> {
       future: _collectionsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return CircularProgressIndicator();
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Text('No collections available');
+          return Text('No collections available');
         }
 
         return Column(
           children: [
             TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Search Collections',
                 prefixIcon: Icon(Icons.search),
               ),
@@ -84,7 +84,7 @@ class _CollectionDropdownState extends State<CollectionDropdown> {
                   final isSelected = widget.selectedItems.contains(collection);
                   return ListTile(
                     title: Text(collection),
-                    trailing: isSelected ? const Icon(Icons.check_box) : const Icon(Icons.check_box_outline_blank),
+                    trailing: isSelected ? Icon(Icons.check_box) : Icon(Icons.check_box_outline_blank),
                     onTap: () {
                       setState(() {
                         if (isSelected) {
@@ -119,7 +119,7 @@ Widget _buildMultiSelectDropdown(BuildContext context,
       required ValueChanged<List<String>> onSelectionChanged}) {
   return ListTile(
     title: Text(title),
-    trailing: const Icon(Icons.arrow_drop_down),
+    trailing: Icon(Icons.arrow_drop_down),
     onTap: () async {
       final List<String>? selected = await showDialog<List<String>>(
         context: context,

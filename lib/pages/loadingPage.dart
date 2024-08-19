@@ -6,7 +6,7 @@ import 'package:fw_demo/pages/menuPage.dart';
 class LoadingPage extends StatefulWidget {
   final String serverAddress;
 
-  const LoadingPage({super.key, required this.serverAddress});
+  LoadingPage({required this.serverAddress});
 
   @override
   _LoadingPageState createState() => _LoadingPageState();
@@ -31,7 +31,7 @@ class _LoadingPageState extends State<LoadingPage> {
     if (mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MenuPage()),
+        MaterialPageRoute(builder: (context) => MenuPage()),
       );
     }
   }
@@ -57,12 +57,12 @@ class _LoadingPageState extends State<LoadingPage> {
                   style: TextStyle(fontSize: screenWidth * 0.05),
                 ),
                 SizedBox(height: screenHeight * 0.02),
-                SizedBox(
+                Container(
                   width: screenWidth * 0.8,
                   child: LinearProgressIndicator(
                     value: inventoryProvider.loadingProgress,
                     backgroundColor: Colors.grey[200],
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.02),

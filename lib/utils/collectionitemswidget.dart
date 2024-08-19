@@ -10,7 +10,7 @@ class CollectionItemsWidget extends StatefulWidget {
   final int collectionId;
   final List<Inventory> allItems;
 
-  const CollectionItemsWidget({super.key, required this.collectionId, required this.allItems});
+  const CollectionItemsWidget({Key? key, required this.collectionId, required this.allItems}) : super(key: key);
 
   @override
   _CollectionItemsWidgetState createState() => _CollectionItemsWidgetState();
@@ -44,15 +44,15 @@ class _CollectionItemsWidgetState extends State<CollectionItemsWidget> {
       future: _apiServiceFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return const Center(child: Text('Error initializing API service'));
+          return Center(child: Text('Error initializing API service'));
         }
 
         List<Inventory> collectionItems = _filterItemsByCollection(widget.collectionId);
 
         if (collectionItems.isEmpty) {
-          return const Center(child: Text('No items found in this collection'));
+          return Center(child: Text('No items found in this collection'));
         }
 
         return Column(
@@ -60,10 +60,10 @@ class _CollectionItemsWidgetState extends State<CollectionItemsWidget> {
           children: [
             Text(
               'Collection Items (${collectionItems.length})',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
-            SizedBox(
+            SizedBox(height: 8),
+            Container(
               height: 150,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
@@ -74,19 +74,19 @@ class _CollectionItemsWidgetState extends State<CollectionItemsWidget> {
                     future: _apiService.getImagesByItemNumber(item.itemNumber),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const SizedBox(
+                        return Container(
                           width: 100,
                           height: 100,
                           child: Center(child: CircularProgressIndicator()),
                         );
                       } else if (snapshot.hasError) {
-                        return const SizedBox(
+                        return Container(
                           width: 100,
                           height: 100,
                           child: Center(child: Text('Error')),
                         );
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const SizedBox(
+                        return Container(
                           width: 100,
                           height: 100,
                           child: Center(child: Text('No Image')),

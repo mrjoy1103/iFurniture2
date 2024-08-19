@@ -9,7 +9,7 @@ import '../pages/productdetails.dart';  // Ensure the correct import path for Pr
 class RelatedItemsWidget extends StatefulWidget {
   final List<InventoryRelatedItems> relatedItems;
 
-  const RelatedItemsWidget({super.key, required this.relatedItems});
+  const RelatedItemsWidget({Key? key, required this.relatedItems}) : super(key: key);
 
   @override
   _RelatedItemsWidgetState createState() => _RelatedItemsWidgetState();
@@ -44,7 +44,7 @@ class _RelatedItemsWidgetState extends State<RelatedItemsWidget> {
   @override
   Widget build(BuildContext context) {
     if (widget.relatedItems.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'Related Items (0)',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -55,12 +55,12 @@ class _RelatedItemsWidgetState extends State<RelatedItemsWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Related Items',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
-        SizedBox(
+        SizedBox(height: 8),
+        Container(
           height: 150,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -71,19 +71,19 @@ class _RelatedItemsWidgetState extends State<RelatedItemsWidget> {
                 future: _fetchImages(item.relatedItem.toInt()), // Fetch the images based on related item number
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const SizedBox(
+                    return Container(
                       width: 100,
                       height: 100,
                       child: Center(child: CircularProgressIndicator()),
                     );
                   } else if (snapshot.hasError) {
-                    return const SizedBox(
+                    return Container(
                       width: 100,
                       height: 100,
                       child: Center(child: Text('Error')),
                     );
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const SizedBox(
+                    return Container(
                       width: 100,
                       height: 100,
                       child: Center(child: Text('No Image')),

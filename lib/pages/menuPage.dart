@@ -263,18 +263,21 @@ import 'package:flutter/material.dart';
 import 'package:fw_demo/pages/productdetails.dart';
 import 'package:fw_demo/pages/serverConnect.dart';
 import 'package:fw_demo/pages/settings.dart';
+import 'package:fw_demo/utils/routes.dart';
 import 'package:fw_demo/utils/slidingbar.dart';
 import 'package:provider/provider.dart';
+import 'package:fw_demo/pages/barcodecamerascan.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/inventory_provider.dart';
 import '../services/api_services.dart';
 import 'lists_page.dart';
+import 'login.dart';
 import 'product_inventory.dart';
 import '../utils/sharedprefutils.dart';
 import 'package:fw_demo/utils/bluetooth_manager.dart';
+import 'package:fw_demo/pages/barcodeScanner.dart';
 
 class MenuPage extends StatefulWidget {
-  const MenuPage({super.key});
-
   @override
   _MenuPageState createState() => _MenuPageState();
 }
@@ -332,13 +335,17 @@ class _MenuPageState extends State<MenuPage> {
       print("Here is the parsed data  $itemNumber");
       if (itemNumber != null && inventoryProvider.containsItemNumber(itemNumber)) {
         final product = await apiService.getProductByNumber(itemNumber);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailsPage(itemNumber: itemNumber),
-          ),
-        );
-            } else {
+        if (product != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductDetailsPage(itemNumber: itemNumber),
+            ),
+          );
+        } else {
+          showSlidingBar(context, 'Product not found', isError: true);
+        }
+      } else {
         showSlidingBar(context, 'Product not found', isError: true);
       }
     } catch (e) {
@@ -362,16 +369,16 @@ class _MenuPageState extends State<MenuPage> {
       ),
     );
 
-    overlay.insert(overlayEntry);
+    overlay?.insert(overlayEntry);
 
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 3), () {
       overlayEntry.remove();
     });
   }
 
   void _showProductNotFound() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Server Address Error')),
+      SnackBar(content: Text('Server Address Error')),
     );
   }
 
@@ -379,20 +386,20 @@ class _MenuPageState extends State<MenuPage> {
     return (await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmation'),
-        content: const Text('Would you like to log out and move to the server configuration page?'),
+        title: Text('Confirmation'),
+        content: Text('Would you like to log out and move to the server configuration page?'),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('No'),
+            child: Text('No'),
           ),
           TextButton(
             onPressed: () => Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => const ServerAddressPage()),
+                MaterialPageRoute(builder: (context) => ServerAddressPage()),
                 ModalRoute.withName('/')
             ),
-            child: const Text('Yes'),
+            child: Text('Yes'),
           ),
         ],
       ),
@@ -407,7 +414,7 @@ class _MenuPageState extends State<MenuPage> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(''),
+          title: Text(''),
           automaticallyImplyLeading: false,  // Remove the back arrow
           actions: [
             Consumer<BluetoothManager>(
@@ -425,7 +432,7 @@ class _MenuPageState extends State<MenuPage> {
                               ? 'External scanner is connected'
                               : 'External scanner is not connected',
                         ),
-                        duration: const Duration(seconds: 2),
+                        duration: Duration(seconds: 2),
                       ),
                     );
                   },
@@ -440,7 +447,7 @@ class _MenuPageState extends State<MenuPage> {
           ],
         ),
         body: _serverAddress == null
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(child: CircularProgressIndicator())
             : GridView.count(
           crossAxisCount: 2,
           children: [
@@ -490,7 +497,7 @@ class _MenuPageState extends State<MenuPage> {
                   () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SettingsPage()),
+                  MaterialPageRoute(builder: (context) => SettingsPage()),
                 );
               },
             ),
@@ -504,7 +511,7 @@ class _MenuPageState extends State<MenuPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.all(8.0),
+        margin: EdgeInsets.all(8.0),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10.0),
@@ -513,7 +520,7 @@ class _MenuPageState extends State<MenuPage> {
               color: Colors.grey.withOpacity(0.3),
               spreadRadius: 3,
               blurRadius: 5,
-              offset: const Offset(0, 3),
+              offset: Offset(0, 3),
             ),
           ],
         ),
@@ -525,10 +532,10 @@ class _MenuPageState extends State<MenuPage> {
               height: 80.0,
               width: 80.0,
             ),
-            const SizedBox(height: 10.0),
+            SizedBox(height: 10.0),
             Text(
               label,
-              style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
             ),
           ],
         ),

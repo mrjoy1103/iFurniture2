@@ -1,3 +1,4 @@
+import 'package:fw_demo/models/Inventory.dart';
 
 class ListedItem {
   final int listId;

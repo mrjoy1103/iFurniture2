@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/inventory.dart';
 import '../models/inventory_images.dart';
 //import '../models/item_image.dart';
 import '../providers/inventory_provider.dart';
@@ -87,7 +88,7 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
               content: SingleChildScrollView(
                 child: Column(
                   children: [
-                    if (isLoading) const Center(child: CircularProgressIndicator()),
+                    if (isLoading) Center(child: CircularProgressIndicator()),
                     FilterWidget(
                       criteria: tempCriteria,
                       onCriteriaChanged: (newCriteria) {
@@ -146,9 +147,9 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return const Dialog(
+        return Dialog(
           child: Padding(
-            padding: EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -185,16 +186,16 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
           backgroundColor: Colors.white70,
           actions: [
             ToggleButtons(
+              children: [
+                Icon(Icons.list),
+                Icon(Icons.grid_view),
+              ],
               isSelected: [_isGridView, !_isGridView],
               onPressed: (int index) {
                 setState(() {
                   _isGridView = index == 1;
                 });
               },
-              children: const [
-                Icon(Icons.list),
-                Icon(Icons.grid_view),
-              ],
             ),
             IconButton(
               icon: const Icon(Icons.filter_list),
@@ -336,7 +337,7 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
 
   Widget _buildGridView(InventoryProvider inventoryProvider) {
     return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 0.75,
         crossAxisSpacing: 10,
@@ -362,12 +363,12 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
               content = Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
+                  Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       item.description,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -377,7 +378,7 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
                   ),
                   Text(
                     '\$${item.retail?.toStringAsFixed(2) ?? 'N/A'}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       color: Colors.green,
                     ),
@@ -402,7 +403,7 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
                       children: [
                         Text(
                           item.description,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -411,7 +412,7 @@ class _ProductInventoryPageState extends State<ProductInventoryPage> {
                         ),
                         Text(
                           '\$${item.retail?.toStringAsFixed(2) ?? 'N/A'}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             color: Colors.green,
                           ),

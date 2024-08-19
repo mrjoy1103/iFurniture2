@@ -15,12 +15,13 @@ import 'package:fw_demo/utils/relateditemswidget.dart';
 import 'package:fw_demo/utils/collectionitemswidget.dart';
 import 'package:fw_demo/utils/branchInventorygrid.dart';
 import '../utils/slidingbar.dart';
+import 'barcodecamerascan.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final int itemNumber;
 
-  const ProductDetailsPage({super.key, required this.itemNumber});
+  const ProductDetailsPage({Key? key, required this.itemNumber}) : super(key: key);
 
   @override
   _ProductDetailsPageState createState() => _ProductDetailsPageState();
@@ -58,7 +59,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       return product;
     } catch (e) {
       print('Error fetching product details: $e');
-      rethrow;
+      throw e;
     }
   }
 
@@ -75,7 +76,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       return images;
     } catch (e) {
       print('Error fetching product images: $e');
-      rethrow;
+      throw e;
     }
   }
 
@@ -92,7 +93,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       return branchInventory;
     } catch (e) {
       print('Error fetching branch inventory: $e');
-      rethrow;
+      throw e;
     }
   }
 
@@ -142,16 +143,16 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         child: Wrap(
           children: <Widget>[
             ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Photo Library'),
+              leading: Icon(Icons.photo_library),
+              title: Text('Photo Library'),
               onTap: () {
                 Navigator.of(context).pop();
                 _pickImageAndUpload(ImageSource.gallery);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('Camera'),
+              leading: Icon(Icons.photo_camera),
+              title: Text('Camera'),
               onTap: () {
                 Navigator.of(context).pop();
                 _pickImageAndUpload(ImageSource.camera);
@@ -171,11 +172,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           future: _futureBranchInventory,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No inventory data available'));
+              return Center(child: Text('No inventory data available'));
             }
 
             return BranchInventoryGrid(
@@ -198,10 +199,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             backgroundColor: color,
             child: Text(
               label,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.white),
             ),
           ),
-          const SizedBox(height: 5),
+          SizedBox(height: 5),
           //Text(label),
         ],
       ),
@@ -216,11 +217,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
           ),
           Text(
             value,
-            style: const TextStyle(fontSize: 13),
+            style: TextStyle(fontSize: 13),
           ),
         ],
       ),
@@ -257,9 +258,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       ),
     );
 
-    overlay.insert(overlayEntry);
+    overlay?.insert(overlayEntry);
 
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 3), () {
       overlayEntry.remove();
     });
   }
@@ -274,17 +275,17 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const MenuPage()),
+                MaterialPageRoute(builder: (context) => MenuPage()),
               );
             },
-            icon: const Icon(Icons.menu),
+            icon: Icon(Icons.menu),
           ),
           IconButton(onPressed: () async {
             String? barcode = await BarcodeScannerUtil.scanBarcode();
             if (barcode != null && barcode.isNotEmpty) {
               _handleScannedBarcode(barcode);
             }
-          },icon: const Icon(Icons.camera_alt_outlined))
+          },icon: Icon(Icons.camera_alt_outlined))
         ],
       ),
       body: FutureBuilder<Inventory>(
@@ -337,8 +338,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                               const SizedBox(height: 16),
                               ElevatedButton.icon(
                                 onPressed: _showImageSourceActionSheet,
-                                icon: const Icon(Icons.add_a_photo),
-                                label: const Text('Upload Image'),
+                                icon: Icon(Icons.add_a_photo),
+                                label: Text('Upload Image'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
                                 ),
@@ -351,7 +352,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                       List<ItemImage> images = snapshot.data!;
                       return Column(
                         children: [
-                          SizedBox(
+                          Container(
                             height: 300,
                             child: PageView.builder(
                               controller: _pageController,
@@ -383,7 +384,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                           SmoothPageIndicator(
                             controller: _pageController,
                             count: images.length,
-                            effect: const WormEffect(
+                            effect: WormEffect(
                               dotHeight: 8.0,
                               dotWidth: 8.0,
                               activeDotColor: Colors.green,
@@ -423,7 +424,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                         String? serverAddress = await SharedPreferencesUtil.getServerAddress();
                         if (serverAddress == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Server address not found')),
+                            SnackBar(content: Text('Server address not found')),
                           );
                           return;
                         }
@@ -440,7 +441,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green, // Background color
-                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                       ),
                       child: const Text('Add to List'),
                     ),

@@ -9,10 +9,10 @@ class FilterWidget extends StatefulWidget {
   final ValueChanged<FilterCriteria> onCriteriaChanged;
 
   const FilterWidget({
-    super.key,
+    Key? key,
     required this.criteria,
     required this.onCriteriaChanged,
-  });
+  }) : super(key: key);
 
   @override
   _FilterWidgetState createState() => _FilterWidgetState();
@@ -37,7 +37,7 @@ class _FilterWidgetState extends State<FilterWidget> {
   }) {
     return ListTile(
       title: Text(title),
-      trailing: const Icon(Icons.arrow_drop_down),
+      trailing: Icon(Icons.arrow_drop_down),
       onTap: () async {
         final List<String>? selected = await showDialog<List<String>>(
           context: context,

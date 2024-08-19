@@ -4,10 +4,11 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fw_demo/services/api_services.dart';
 import 'package:fw_demo/models/device.dart';
 import 'package:fw_demo/utils/routes.dart';
+import 'package:provider/provider.dart';
+import '../providers/inventory_provider.dart';
+import '../models/filter_criteria.dart';
 
 class ServerAddressPage extends StatefulWidget {
-  const ServerAddressPage({super.key});
-
   @override
   _ServerAddressPageState createState() => _ServerAddressPageState();
 }
@@ -191,7 +192,7 @@ class _ServerAddressPageState extends State<ServerAddressPage> {
               const SizedBox(height: 10),
               Text(
                 _switchvalue ? 'HTTPS Enabled' : 'HTTPS Disabled',
-                style: const TextStyle(fontSize: 20),
+                style: TextStyle(fontSize: 20),
               ),
               const SizedBox(height: 20),
               Form(

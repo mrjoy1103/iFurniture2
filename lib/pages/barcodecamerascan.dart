@@ -8,8 +8,6 @@ import '../utils/sharedprefutils.dart';
 import 'package:fw_demo/providers/inventory_provider.dart';
 
 class BarcodeScannerCameraPage extends StatefulWidget {
-  const BarcodeScannerCameraPage({super.key});
-
   @override
   _BarcodeScannerCameraPageState createState() => _BarcodeScannerCameraPageState();
 }
@@ -52,13 +50,17 @@ class _BarcodeScannerCameraPageState extends State<BarcodeScannerCameraPage> {
       print("Here is the parsed data  $itemNumber");
       if (itemNumber != null && inventoryProvider.containsItemNumber(itemNumber)) {
         final product = await apiService.getProductByNumber(itemNumber);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailsPage(itemNumber: itemNumber),
-          ),
-        );
-            } else {
+        if (product != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductDetailsPage(itemNumber: itemNumber),
+            ),
+          );
+        } else {
+          showSlidingBar(context, 'Product not found', isError: true);
+        }
+      } else {
         showSlidingBar(context, 'Product not found', isError: true);
       }
     } catch (e) {
@@ -80,16 +82,16 @@ class _BarcodeScannerCameraPageState extends State<BarcodeScannerCameraPage> {
       ),
     );
 
-    overlay.insert(overlayEntry);
+    overlay?.insert(overlayEntry);
 
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 3), () {
       overlayEntry.remove();
     });
   }
 
   void _showProductNotFound() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Server Address Error')),
+      SnackBar(content: Text('Server Address Error')),
     );
   }
 
@@ -102,7 +104,7 @@ class _BarcodeScannerCameraPageState extends State<BarcodeScannerCameraPage> {
     _scanBarcode;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(''),
+        title: Text(''),
       ),
        body: Center(
         child: Column(
@@ -110,7 +112,7 @@ class _BarcodeScannerCameraPageState extends State<BarcodeScannerCameraPage> {
            children: [
              ElevatedButton(
                onPressed: _scanBarcode,
-               child: const Text('Start Scanning'),
+               child: Text('Start Scanning'),
              ),
              if (scannedBarcode != null)
                //Text('Scanned Code: $scannedBarcode'),
@@ -118,7 +120,7 @@ class _BarcodeScannerCameraPageState extends State<BarcodeScannerCameraPage> {
                onPressed: () {
                   Navigator.pop(context); // Return to the previous page
                },
-               child: const Text('Back'),
+               child: Text('Back'),
              ),
            ],
          ),
