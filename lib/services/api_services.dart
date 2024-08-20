@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:fw_demo/utils/sharedprefutils.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
-import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/branch_inventory.dart';
 import '../models/cipherInventory.dart';
@@ -11,6 +9,8 @@ import '../models/device.dart';
 import '../models/inventory_images.dart';
 import '../models/list.dart';
 import '../models/listedItem.dart';
+import '../models/order.dart';
+import '../models/orderFilter.dart';
 import '../models/selectedItemlist.dart';
 import '../models/user.dart';
 import '../models/inventory.dart';
@@ -731,5 +731,108 @@ class ApiService {
             throw e;
         }
     }
+
+    // for the orders
+    Future<List<Order>> getFilteredOrders(OrderFilter filter) async {
+      await _loadDeviceName();
+      final url = Uri.parse('$baseUrl/Orders/GetFilteredOrders');
+
+      try {
+        final response = await http.post(
+          url,
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'deviceName': deviceName,
+          },
+          body: jsonEncode(filter.toJson()), // Convert OrderFilter to JSON
+        );
+
+        if (response.statusCode == 200) {
+          final responseBody = jsonDecode(response.body);
+          if (responseBody['Result'] == 0) {
+            List<dynamic> body = responseBody['Data'];
+            List<Order> orders =
+            body.map((dynamic item) => Order.fromJson(item)).toList();
+            return orders;
+          } else {
+            throw Exception(responseBody['Message']);
+          }
+        } else {
+          throw Exception('Failed to load filtered orders');
+        }
+      } catch (e) {
+        print('Error fetching filtered orders: $e');
+        throw e;
+      }
+    }
+
+    Future<List<Order>> getOrdersPastMonth() async {
+      await _loadDeviceName();
+      final url = Uri.parse('$baseUrl/Orders/GetOrdersPastMonth');
+
+      try {
+        final response = await http.get(
+          url,
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'deviceName': deviceName,
+          },
+        );
+
+        if (response.statusCode == 200) {
+          final responseBody = jsonDecode(response.body);
+          if (responseBody['Result'] == 0) {
+            List<dynamic> body = responseBody['Data'];
+            List<Order> orders =
+            body.map((dynamic item) => Order.fromJson(item)).toList();
+            return orders;
+          } else {
+            throw Exception(responseBody['Message']);
+          }
+        } else {
+          throw Exception('Failed to load past month orders');
+        }
+      } catch (e) {
+        print('Error fetching past month orders: $e');
+        throw e;
+      }
+    }
+
+    Future<List<Order>> getAllOrders() async {
+      await _loadDeviceName();
+      final url = Uri.parse('$baseUrl/Orders/GetAllOrders');
+
+      try {
+        final response = await http.get(
+          url,
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'deviceName': deviceName,
+          },
+        );
+
+        if (response.statusCode == 200) {
+          final responseBody = jsonDecode(response.body);
+          if (responseBody['Result'] == 0) {
+            List<dynamic> body = responseBody['Data'];
+            List<Order> orders =
+            body.map((dynamic item) => Order.fromJson(item)).toList();
+            return orders;
+          } else {
+            throw Exception(responseBody['Message']);
+          }
+        } else {
+          throw Exception('Failed to load orders');
+        }
+      } catch (e) {
+        print('Error fetching orders: $e');
+        throw e;
+      }
+    }
+
+
+
+
+
 
 }

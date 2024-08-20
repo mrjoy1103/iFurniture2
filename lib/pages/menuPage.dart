@@ -406,6 +406,8 @@ class _MenuPageState extends State<MenuPage> {
     )) ?? false;
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     final bluetoothManager = Provider.of<BluetoothManager>(context);
@@ -446,60 +448,70 @@ class _MenuPageState extends State<MenuPage> {
               ),*/
           ],
         ),
+        // Optional padding at the top
+
+
         body: _serverAddress == null
             ? Center(child: CircularProgressIndicator())
-            : GridView.count(
-          crossAxisCount: 2,
+            : Column(
           children: [
-            _buildMenuItem(
-              context,
-              'assets/products.png',
-              'Inventory',
-                  () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProductInventoryPage(serverAddress: _serverAddress!),
+            SizedBox(height: 20), // Optional space at the top
+            TopLogo(), // Add the TopLogo widget here
+            SizedBox(height: 20), // Space between logo and grid
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                padding: EdgeInsets.all(16.0), // Add some padding
+                crossAxisSpacing: 16.0,
+                mainAxisSpacing: 16.0,
+                children: [
+                  _buildMenuItem(
+                    context,
+                    'assets/products.png',
+                    'Inventory',
+                        () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProductInventoryPage(serverAddress: _serverAddress!),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context,
-              'assets/list.png',
-              'Lists',
-                  () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ListsPage(serverAddress: _serverAddress!),
+                  _buildMenuItem(
+                    context,
+                    'assets/list.png',
+                    'Lists',
+                        () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ListsPage(serverAddress: _serverAddress!),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context,
-              'assets/barcode.png',
-              'Scan',
-                  () { _scanBarcode();
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => BarcodeScannerCameraPage(),
-                //   ),
-                //);
-              },
-            ),
-            _buildMenuItem(
-              context,
-              'assets/settings.png',
-              'Settings',
-                  () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SettingsPage()),
-                );
-              },
+                  _buildMenuItem(
+                    context,
+                    'assets/barcode.png',
+                    'Scan',
+                        () {
+                      _scanBarcode();
+                    },
+                  ),
+                  _buildMenuItem(
+                    context,
+                    'assets/settings.png',
+                    'Settings',
+                        () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SettingsPage()),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -508,38 +520,71 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   Widget _buildMenuItem(BuildContext context, String iconPath, String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 3,
-              blurRadius: 5,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              iconPath,
-              height: 80.0,
-              width: 80.0,
-            ),
-            SizedBox(height: 10.0),
-            Text(
-              label,
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
-            ),
-          ],
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 3,
+                blurRadius: 5,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                iconPath,
+                height: 80.0,
+                width: 80.0,
+              ),
+              SizedBox(height: 10.0),
+              Text(
+                label,
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class TopLogo extends StatelessWidget {
+  @override
+
+  Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Logo Image
+        Image.asset(
+          'assets/fw_logo.png',
+          height: screenHeight * 0.4,
+          width: screenWidth * 0.6,
+        ),
+        const SizedBox(height: 10.0),
+        // Title Text
+        // Subtitle Text
+        Text(
+          'Powered by Furniture Wizard Software',
+          style: TextStyle(
+            fontSize: 14.0,
+            color: Colors.grey[700], // Customize with your preferred color
+          ),
+        ),
+      ],
     );
   }
 }
